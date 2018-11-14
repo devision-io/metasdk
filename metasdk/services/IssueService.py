@@ -1,8 +1,3 @@
-import json
-
-import collections
-
-
 class IssueService:
 
     def __init__(self, app, default_headers):
@@ -15,7 +10,7 @@ class IssueService:
         self.__data_get_cache = {}
         self.__metadb = app.db("meta")
 
-    def change_issue_status(self, issue_id, status_id):
+    def change_issue_status(self, issue_id, status_id: str):
         """
         Смета статуса тикета
         :param issue_id: int
@@ -34,35 +29,35 @@ class IssueService:
         Перевести в статус "В ожидании"
         :param issue_id: int
         """
-        self.change_issue_status(issue_id, 1)
+        self.change_issue_status(issue_id, '1')
 
     def in_progress_issue(self, issue_id):
         """
         Взять в работу
         :param issue_id: int
         """
-        self.change_issue_status(issue_id, 2)
+        self.change_issue_status(issue_id, '2')
 
     def reject_issue(self, issue_id):
         """
         Отклонить задачу
         :param issue_id: int
         """
-        self.change_issue_status(issue_id, 7)
+        self.change_issue_status(issue_id, '7')
 
     def clarification_issue(self, issue_id):
         """
         Уточнение
         :param issue_id: int
         """
-        self.change_issue_status(issue_id, 4)
+        self.change_issue_status(issue_id, '4')
 
     def done_issue(self, issue_id):
         """
         Успешное выполенение
         :param issue_id: int
         """
-        self.change_issue_status(issue_id, 3)
+        self.change_issue_status(issue_id, '3')
 
     def add_issue_msg(self, issue_id, msg):
         self.__metadb.update("""

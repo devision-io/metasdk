@@ -1,7 +1,7 @@
 import os
 from metasdk import MetaApp
 
-META = MetaApp(meta_url="http://localhost:8080")
+META = MetaApp()
 log = META.log
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))

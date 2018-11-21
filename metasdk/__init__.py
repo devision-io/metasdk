@@ -74,7 +74,7 @@ class MetaApp(object):
                 debug = False
         self.debug = debug
 
-        self.meta_url = os.environ.get("META_URL", meta_url or "http://apimeta.1ad.ru")
+        self.meta_url = os.environ.get("META_URL", meta_url or "http://apimeta.devision.io")
         self.api_proxy_url = os.environ.get("API_PROXY_URL", api_proxy_url or "http://apiproxy.apis.kb.1ad.ru")
 
         if debug and not starter_api_url:

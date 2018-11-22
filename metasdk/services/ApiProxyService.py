@@ -3,6 +3,8 @@ import json
 import requests
 import time
 
+from metasdk.logger import LOGGER_ENTITY
+
 from metasdk.exceptions import RetryHttpRequestError, EndOfTriesError, UnexpectedError, ApiProxyError
 
 
@@ -22,12 +24,16 @@ class ApiProxyService:
         :param engine: Система
         :param payload: Данные для запроса
         :param method: string Может содержать native_call | tsv | json_newline
-        :param analyze_json_error_param: Нужно ли производить анализ параметра error d jndtnt ghjrcb
+        :param analyze_json_error_param: Нужно ли производить анализ параметра error в ответе прокси
         :param retry_request_substr_variants: Список подстрок, при наличии которых в ответе будет происходить перезапрос
         :param stream:
         :return:
         """
-        log_ctx = {"engine": engine, "method": payload.get('method'), "method_params": payload.get('method_params')}
+        log_ctx = {
+            "engine": engine,
+            "method": payload.get('method'),
+            "method_params": payload.get('method_params')
+        }
         self.__app.log.info("Call api proxy", log_ctx)
         body = {
             "engine": engine,
@@ -37,9 +43,13 @@ class ApiProxyService:
             try:
                 # 1h таймаут, так как бывают большие долгие данные, а лимит хоть какой-то нужен
                 body_str = json.dumps(body)
-                resp = requests.post(self.__app.api_proxy_url + "/" + method, body_str, timeout=3600, stream=stream, headers={
-                    "User-Agent": self.__app.user_agent
-                })
+                headers = {
+                    "User-Agent": self.__app.user_agent,
+                    "X-App": "META",
+                    "X-Worker": self.__app.service_id,
+                    "X-ObjectLocator": LOGGER_ENTITY.get("objectLocator")
+                }
+                resp = requests.post(self.__app.api_proxy_url + "/" + method, body_str, timeout=3600, stream=stream, headers=headers)
 
                 self.check_err(resp, analyze_json_error_param=analyze_json_error_param, retry_request_substr_variants=retry_request_substr_variants)
                 return resp

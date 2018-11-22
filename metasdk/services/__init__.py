@@ -13,7 +13,7 @@ def get_api_call_headers(app):
         "User-Agent": app.user_agent,
     }
     if not app.developer_settings:
-        raise AuthError({u"message": u"Для корректной работы SDK нужно установить настройки разработчика", "url": "http://meta.realweb.ru/page?a=63&p=3975"})
+        raise AuthError({"message": "Для корректной работы SDK нужно установить настройки разработчика", "url": "https://apps.devision.io/page?a=63&p=3975"})
     headers.update(app.developer_settings.get('api_headers'))
     return headers
 

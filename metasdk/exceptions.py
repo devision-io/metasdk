@@ -8,6 +8,13 @@ class SDKError(Exception):
     pass
 
 
+class BadRequestError(SDKError):
+    """
+    Запрос принципиально неправильный (неверная версия api, не передан обязательный параметр и пр.) (HTTP 400)
+    """
+    pass
+
+
 class AuthError(SDKError):
     """
     Невозможно авторизоваться (HTTP 401)

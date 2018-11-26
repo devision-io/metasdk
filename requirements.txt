@@ -4,4 +4,4 @@ six==1.10.0
 python-logstash==0.4.6
 fluent-logger==0.9.3
 PyJWT==1.5.3
-requests==2.19.1
+requests==2.20.1

@@ -15,6 +15,13 @@ class AuthError(SDKError):
     pass
 
 
+class ForbiddenError(SDKError):
+    """
+    Нет прав для соверщения операции (HTTP 403)
+    """
+    pass
+
+
 class ServerError(SDKError):
     """
     Сервер ответил ошибкой (HTTP >500)

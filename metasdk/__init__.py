@@ -191,6 +191,12 @@ class MetaApp(object):
             except (requests.exceptions.ConnectionError, ConnectionError, TimeoutError) as e:
                 self.log.warning('META API Connection Error. Sleep...', {"e": e})
                 time.sleep(15)
+            except Exception as e:
+                if 'Служба частично или полностью недоступна' in str(e):
+                    self.log.warning('META API Connection Error. Sleep...', {"e": e})
+                    time.sleep(15)
+                else:
+                    raise e
 
         raise ServerError(request)
 
@@ -239,6 +245,12 @@ class MetaApp(object):
             except (requests.exceptions.ConnectionError, ConnectionError, TimeoutError) as e:
                 self.log.warning('META API Connection Error. Sleep...', {"e": e})
                 time.sleep(15)
+            except Exception as e:
+                if 'Служба частично или полностью недоступна' in str(e):
+                    self.log.warning('META API Service Temporarily Unavailable. Sleep...', {"e": e})
+                    time.sleep(15)
+                else:
+                    raise e
 
         raise ServerError(request)
 

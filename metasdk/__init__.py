@@ -18,6 +18,7 @@ from metasdk.services.ExportService import ExportService
 from metasdk.services.ExternalSystemService import ExternalSystemService
 from metasdk.services.FeedService import FeedService
 from metasdk.services.IssueService import IssueService
+from metasdk.services.LockService import LockService
 from metasdk.services.MediaService import MediaService
 from metasdk.services.MetaqlService import MetaqlService
 from metasdk.services.SettingsService import SettingsService
@@ -74,6 +75,7 @@ class MetaApp(object):
                 debug = False
         self.debug = debug
 
+        self.redis_url = os.environ.get("REDIS_URL", meta_url or "s1.meta.vmc.loc:6379")
         self.meta_url = os.environ.get("META_URL", meta_url or "http://apimeta.devision.io")
         self.api_proxy_url = os.environ.get("API_PROXY_URL", api_proxy_url or "http://apiproxy.apis.kb.1ad.ru")
 
@@ -106,6 +108,7 @@ class MetaApp(object):
         self.ApiProxyService = ApiProxyService(self, self.__default_headers)
         self.ExternalSystemService = ExternalSystemService(self, self.__default_headers)
         self.FeedService = FeedService(self, self.__default_headers)
+        self.LockService = LockService(self)
 
         if include_worker:
             stdin = "[]" if debug else ''.join(sys.stdin.readlines())

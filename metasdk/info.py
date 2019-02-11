@@ -1,4 +1,4 @@
-__version__ = '1.0.8'
+__version__ = '1.0.9'
 __package_name__ = 'metasdk'
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ SOURCE_FORMAT_EXTENSION = {
     'JSON_NEWLINE': '.json'
 }
 
+
 class FeedService:
     def __init__(self, app, default_headers):
         """

@@ -80,6 +80,13 @@ class ApiProxyError(SDKError):
 
 class EndOfTriesError(SDKError):
     """
-    Достигнут лимит колличества повторов запроса
+    Достигнут лимит количества повторов запроса
+    """
+    pass
+
+
+class LockServiceError(SDKError):
+    """
+    Ошибка при работе с сервисом блокировки очереди (LockService)
     """
     pass

@@ -46,7 +46,7 @@ class ApiClient:
         if not self.access_token:
             raise ValueError("access_token должен был быть получен")
 
-        for try_idx in range(2):
+        for _try_idx in range(2):
             url = self.host + '/' + self.api_version + '/' + method_path
             headers = {"Authorization": "Bearer " + self.access_token}
 

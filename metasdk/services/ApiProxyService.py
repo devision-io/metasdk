@@ -39,7 +39,7 @@ class ApiProxyService:
             "engine": engine,
             "payload": payload
         }
-        for try_idx in range(20):
+        for _try_idx in range(20):
             try:
                 # 1h таймаут, так как бывают большие долгие данные, а лимит хоть какой-то нужен
                 body_str = json.dumps(body)

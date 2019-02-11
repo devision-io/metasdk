@@ -24,6 +24,7 @@ from metasdk.services.SettingsService import SettingsService
 from metasdk.services.UserManagementService import UserManagementService
 from metasdk.services.StarterService import StarterService
 from metasdk.services.MailService import MailService
+from metasdk.services.LockService import LockService
 from metasdk.worker import Worker
 
 
@@ -74,6 +75,7 @@ class MetaApp(object):
                 debug = False
         self.debug = debug
 
+        self.redis_url = os.environ.get("REDIS_URL", meta_url or "s1.meta.vmc.loc:6379:1")
         self.meta_url = os.environ.get("META_URL", meta_url or "http://apimeta.devision.io")
         self.api_proxy_url = os.environ.get("API_PROXY_URL", api_proxy_url or "http://apiproxy.apis.kb.1ad.ru")
 
@@ -106,6 +108,7 @@ class MetaApp(object):
         self.ApiProxyService = ApiProxyService(self, self.__default_headers)
         self.ExternalSystemService = ExternalSystemService(self, self.__default_headers)
         self.FeedService = FeedService(self, self.__default_headers)
+        self.LockService = LockService(self)
 
         if include_worker:
             stdin = "[]" if debug else ''.join(sys.stdin.readlines())
@@ -174,7 +177,7 @@ class MetaApp(object):
             "timeout": (60, 1800)
         }
 
-        for try_idx in range(20):
+        for _try_idx in range(20):
             try:
                 resp = requests.post(**request)
                 if resp.status_code == 200:
@@ -201,11 +204,13 @@ class MetaApp(object):
         raise ServerError(request)
 
     def native_api_call(self, service, method, data, options, multipart_form=False, multipart_form_data=None, stream=False, http_path="/api/meta/v1/", http_method='POST',
-                        get_params={}, connect_timeout_sec=60):
+                        get_params=None, connect_timeout_sec=60):
         """
         :type app: metasdk.MetaApp
         :rtype: requests.Response
         """
+        if get_params is None:
+            get_params = {}
         if 'self' in data:
             # может не быть, если вызывается напрямую из кода,
             # а не из прослоек типа DbQueryService
@@ -235,7 +240,7 @@ class MetaApp(object):
             request['data'] = json.dumps(data)
         request['headers'] = _headers
 
-        for try_idx in range(20):
+        for _try_idx in range(20):
             try:
                 resp = requests.request(http_method, **request)
                 if resp.status_code == 200:

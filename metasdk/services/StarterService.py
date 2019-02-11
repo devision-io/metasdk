@@ -91,7 +91,7 @@ class StarterService:
         task = {"serviceId": service_id, "data": data}
         url = self.__app.starter_api_url + '/services/' + service_id + '/tasks'
         last_e = None
-        for idx in range(self.max_retries):
+        for _idx in range(self.max_retries):
             try:
                 resp = requests.post(
                     url=url,
@@ -101,7 +101,7 @@ class StarterService:
                 )
                 try:
                     return json.loads(resp.text)
-                except:
+                except Exception:
                     raise IOError("Starter response read error: " + resp.text)
             except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
                 # При ошибках подключения пытаемся еще раз

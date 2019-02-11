@@ -2,6 +2,7 @@ import logging
 
 from metasdk.logger import LOGGER_ENTITY
 
+
 def preprocessing(func):
     def wrapper(self, msg, context=None):
         """ Этот декоратор занимается предобработкой входных параметров:
@@ -15,12 +16,12 @@ def preprocessing(func):
         if isinstance(error_obj, Exception):
             try:
                 msg = msg + ' ' + str(error_obj.__class__.__name__)
-            except:
+            except Exception:
                 pass
-
 
         return func(self, msg, context)
     return wrapper
+
 
 class Logger:
     """

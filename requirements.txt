@@ -5,3 +5,4 @@ python-logstash==0.4.6
 fluent-logger==0.9.3
 PyJWT==1.5.3
 requests==2.19.1 # 2.20.* имеют баг с докачкой большого потока
+redis==2.10.6

@@ -4,19 +4,26 @@
 
 """
 import json
+from itertools import islice
 import jwt
 
 
-def chunks(list_, count_items_in_chunk):
+def chunks(iterable, count_items_in_chunk):
     """
-    разбить list (l) на куски по n элементов
+    разбить iterable на куски по count_items_in_chunk элементов
 
-    :param list_:
+    :param iterable:
     :param count_items_in_chunk:
     :return:
     """
-    for i in range(0, len(list_), count_items_in_chunk):
-        yield list_[i:i + count_items_in_chunk]
+    iterator = iter(iterable)
+    for first in iterator:  # stops when iterator is depleted
+        def chunk():  # construct generator for next chunk
+            yield first  # yield element from for loop
+            for more in islice(iterator, count_items_in_chunk - 1):
+                yield more  # yield more elements from the iterator
+
+        yield chunk()  # in outer generator, yield next chunk
 
 
 def pretty_json(obj):

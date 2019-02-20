@@ -8,9 +8,9 @@ from itertools import islice
 import jwt
 
 
-def chunks(iterable, count_items_in_chunk):
+def chunks_generator(iterable, count_items_in_chunk):
     """
-    разбить iterable на куски по count_items_in_chunk элементов
+    Очень внимательно! Не дает обходить дважды
 
     :param iterable:
     :param count_items_in_chunk:
@@ -24,6 +24,18 @@ def chunks(iterable, count_items_in_chunk):
                 yield more  # yield more elements from the iterator
 
         yield chunk()  # in outer generator, yield next chunk
+
+
+def chunks(list_, count_items_in_chunk):
+    """
+    разбить list (l) на куски по n элементов
+
+    :param list_:
+    :param count_items_in_chunk:
+    :return:
+    """
+    for i in range(0, len(list_), count_items_in_chunk):
+        yield list_[i:i + count_items_in_chunk]
 
 
 def pretty_json(obj):

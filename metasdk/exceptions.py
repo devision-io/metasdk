@@ -90,3 +90,10 @@ class LockServiceError(SDKError):
     Ошибка при работе с сервисом блокировки очереди (LockService)
     """
     pass
+
+
+class BadParametersError(SDKError):
+    """
+    Ошибка неправильной настройки параметров для запроса апи или фидов
+    """
+    pass

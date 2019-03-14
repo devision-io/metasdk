@@ -1,14 +1,17 @@
 import json
+import time
+import copy
 
 import requests
-import time
 
 from metasdk.logger import LOGGER_ENTITY
-
 from metasdk.exceptions import RetryHttpRequestError, EndOfTriesError, UnexpectedError, ApiProxyError
 
 
 class ApiProxyService:
+
+    MAX_PAGES = 100000
+
     def __init__(self, app, default_headers):
         """
         :type app: metasdk.MetaApp
@@ -61,7 +64,8 @@ class ApiProxyService:
                 time.sleep(20)
         raise EndOfTriesError("Api of api proxy tries request")
 
-    def call_proxy_with_paging(self, engine, payload, method, analyze_json_error_param, retry_request_substr_variants):
+    def call_proxy_with_paging(self, engine, payload, method, analyze_json_error_param, retry_request_substr_variants,
+                               max_pages=MAX_PAGES):
         """
         Постраничный запрос
         :param engine: Система
@@ -71,16 +75,19 @@ class ApiProxyService:
         :param retry_request_substr_variants: Список подстрок, при наличии которых в ответе будет происходить перезапрос
         :return: объект генератор
         """
+        copy_payload = copy.deepcopy(payload)
 
-        while True:
-            resp = self.__api_proxy_call(engine, payload, method, analyze_json_error_param,
+        for _ in range(max_pages):
+            resp = self.__api_proxy_call(engine, copy_payload, method, analyze_json_error_param,
                                          retry_request_substr_variants)
             yield resp
 
             paging_resp = resp.json().get("paging")
             if not paging_resp:
                 break
-            payload["paging"] = paging_resp
+            copy_payload["paging"] = paging_resp
+
+        self.__app.log("Достигнут максимальный предел страниц", {"max_pages": max_pages})
 
     def call_proxy(self, engine, payload, method, analyze_json_error_param, retry_request_substr_variants,
                    stream=False):

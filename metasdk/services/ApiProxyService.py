@@ -87,7 +87,7 @@ class ApiProxyService:
                 break
             copy_payload["paging"] = paging_resp
 
-        self.__app.log("Достигнут максимальный предел страниц", {"max_pages": max_pages})
+        self.__app.log.warning("Достигнут максимальный предел страниц", {"max_pages": max_pages})
 
     def call_proxy(self, engine, payload, method, analyze_json_error_param, retry_request_substr_variants,
                    stream=False):

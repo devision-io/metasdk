@@ -19,7 +19,8 @@ class ApiProxyService:
         self.__data_get_cache = {}
         self.__data_get_flatten_cache = {}
 
-    def call_proxy(self, engine, payload, method, analyze_json_error_param, retry_request_substr_variants, stream=False):
+    def __api_proxy_call(self, engine, payload, method, analyze_json_error_param, retry_request_substr_variants,
+                         stream=False):
         """
         :param engine: Система
         :param payload: Данные для запроса
@@ -49,14 +50,51 @@ class ApiProxyService:
                     "X-Worker": self.__app.service_id,
                     "X-ObjectLocator": LOGGER_ENTITY.get("objectLocator")
                 }
-                resp = requests.post(self.__app.api_proxy_url + "/" + method, body_str, timeout=3600, stream=stream, headers=headers)
+                resp = requests.post(self.__app.api_proxy_url + "/" + method, body_str, timeout=3600, stream=stream,
+                                     headers=headers)
 
-                self.check_err(resp, analyze_json_error_param=analyze_json_error_param, retry_request_substr_variants=retry_request_substr_variants)
+                self.check_err(resp, analyze_json_error_param=analyze_json_error_param,
+                               retry_request_substr_variants=retry_request_substr_variants)
                 return resp
             except RetryHttpRequestError as e:
                 self.__app.log.warning("Sleep retry query: " + str(e), log_ctx)
                 time.sleep(20)
         raise EndOfTriesError("Api of api proxy tries request")
+
+    def call_proxy_with_paging(self, engine, payload, method, analyze_json_error_param, retry_request_substr_variants):
+        """
+        Постраничный запрос
+        :param engine: Система
+        :param payload: Данные для запроса
+        :param method: string Может содержать native_call | tsv | json_newline
+        :param analyze_json_error_param: Нужно ли производить анализ параметра error в ответе прокси
+        :param retry_request_substr_variants: Список подстрок, при наличии которых в ответе будет происходить перезапрос
+        :return: объект генератор
+        """
+
+        while True:
+            resp = self.__api_proxy_call(engine, payload, method, analyze_json_error_param,
+                                         retry_request_substr_variants)
+            yield resp
+
+            paging_resp = resp.json().get("paging")
+            if not paging_resp:
+                break
+            payload["paging"] = paging_resp
+
+    def call_proxy(self, engine, payload, method, analyze_json_error_param, retry_request_substr_variants,
+                   stream=False):
+        """
+        :param engine: Система
+        :param payload: Данные для запроса
+        :param method: string Может содержать native_call | tsv | json_newline
+        :param analyze_json_error_param: Нужно ли производить анализ параметра error в ответе прокси
+        :param retry_request_substr_variants: Список подстрок, при наличии которых в ответе будет происходить перезапрос
+        :param stream:
+        :return:
+        """
+        return self.__api_proxy_call(engine, payload, method, analyze_json_error_param, retry_request_substr_variants,
+                                     stream)
 
     @staticmethod
     def check_err(resp, analyze_json_error_param=False, retry_request_substr_variants=None):

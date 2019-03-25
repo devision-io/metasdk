@@ -73,11 +73,13 @@ class ApiProxyService:
         :param method: string Может содержать native_call | tsv | json_newline
         :param analyze_json_error_param: Нужно ли производить анализ параметра error в ответе прокси
         :param retry_request_substr_variants: Список подстрок, при наличии которых в ответе будет происходить перезапрос
+        :param max_pages: Максимальное количество страниц в запросе
         :return: объект генератор
         """
         copy_payload = copy.deepcopy(payload)
 
-        for _ in range(max_pages):
+        idx = 0
+        for idx in range(max_pages):
             resp = self.__api_proxy_call(engine, copy_payload, method, analyze_json_error_param,
                                          retry_request_substr_variants)
             yield resp
@@ -87,7 +89,8 @@ class ApiProxyService:
                 break
             copy_payload["paging"] = paging_resp
 
-        self.__app.log.warning("Достигнут максимальный предел страниц", {"max_pages": max_pages})
+        if idx >= max_pages:
+            self.__app.log.warning("Достигнут максимальный предел страниц", {"max_pages": max_pages})
 
     def call_proxy(self, engine, payload, method, analyze_json_error_param, retry_request_substr_variants,
                    stream=False):

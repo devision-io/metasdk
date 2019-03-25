@@ -5,7 +5,7 @@ import copy
 import requests
 
 from metasdk.logger import LOGGER_ENTITY
-from metasdk.exceptions import RetryHttpRequestError, EndOfTriesError, UnexpectedError, ApiProxyError
+from metasdk.exceptions import RetryHttpRequestError, EndOfTriesError, UnexpectedError, ApiProxyError, RateLimitError
 
 
 class ApiProxyService:
@@ -59,9 +59,15 @@ class ApiProxyService:
                 self.check_err(resp, analyze_json_error_param=analyze_json_error_param,
                                retry_request_substr_variants=retry_request_substr_variants)
                 return resp
-            except RetryHttpRequestError as e:
+            except (RetryHttpRequestError, RateLimitError) as e:
                 self.__app.log.warning("Sleep retry query: " + str(e), log_ctx)
-                time.sleep(20)
+                sleep_time = 20
+
+                if e.__class__.__name__ == "RateLimitError":
+                    sleep_time = e.waiting_time
+
+                time.sleep(sleep_time)
+
         raise EndOfTriesError("Api of api proxy tries request")
 
     def call_proxy_with_paging(self, engine, payload, method, analyze_json_error_param, retry_request_substr_variants,
@@ -109,7 +115,7 @@ class ApiProxyService:
     @staticmethod
     def check_err(resp, analyze_json_error_param=False, retry_request_substr_variants=None):
         """
-        :type retry_request_substr_variants: list Список вхождений строк, при налиции которых в ошидке апи будет произведен повторный запрос к апи
+        :type retry_request_substr_variants: list Список вхождений строк, при налиции которых в ошибке апи будет произведен повторный запрос к апи
         """
         if retry_request_substr_variants is None:
             retry_request_substr_variants = []
@@ -129,7 +135,12 @@ class ApiProxyService:
         if analyze_json_error_param:
             data_ = resp.json()
             if 'error' in data_ and data_.get('error'):
-                full_err_ = json.dumps(data_.get('error'))
+                error = data_.get('error')
+                full_err_ = json.dumps(error)
+
+                if error.get("type") == "RateLimitError":
+                    raise RateLimitError(error.get("message"), waiting_time=error.get("waiting_time"))
+
                 for v_ in retry_request_substr_variants:
                     if v_ in full_err_:
                         raise RetryHttpRequestError(full_err_)

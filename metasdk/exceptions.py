@@ -97,3 +97,20 @@ class BadParametersError(SDKError):
     Ошибка неправильной настройки параметров для запроса апи или фидов
     """
     pass
+
+
+class RateLimitError(SDKError):
+    """
+    Достигнут лимит обращений к сервису за секунду.
+    Параметр waiting_time - обязательно передавать при вызове ошибки. Пример: raise RateLimitError(waiting_time=5)
+    """
+
+    def __init__(self, *args, waiting_time):
+        self.waiting_time = waiting_time
+
+
+class QuotaLimitError(SDKError):
+    """
+    Ошибка неправильной настройки параметров для запроса апи или фидов
+    """
+    pass

@@ -3,6 +3,7 @@ import time
 import copy
 
 import requests
+from requests.exceptions import ConnectionError
 
 from metasdk.logger import LOGGER_ENTITY
 from metasdk.exceptions import RetryHttpRequestError, EndOfTriesError, UnexpectedError, ApiProxyError, RateLimitError
@@ -59,7 +60,7 @@ class ApiProxyService:
                 self.check_err(resp, analyze_json_error_param=analyze_json_error_param,
                                retry_request_substr_variants=retry_request_substr_variants)
                 return resp
-            except (RetryHttpRequestError, RateLimitError) as e:
+            except (RetryHttpRequestError, RateLimitError, ConnectionError) as e:
                 self.__app.log.warning("Sleep retry query: " + str(e), log_ctx)
                 sleep_time = 20
 

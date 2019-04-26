@@ -34,6 +34,7 @@ class MetaApp(object):
     build_num = None
     starter_api_url = None
     meta_url = None
+    redis_url = None
     api_proxy_url = None
     log = Logger()
     worker = None
@@ -64,7 +65,8 @@ class MetaApp(object):
                  starter_api_url: str = None,
                  meta_url: str = None,
                  api_proxy_url: str = None,
-                 include_worker: bool = None
+                 include_worker: bool = None,
+                 redis_url: str = None
                  ):
         if debug is None:
             is_prod = os.environ.get('PRODUCTION', False)
@@ -75,7 +77,7 @@ class MetaApp(object):
                 debug = False
         self.debug = debug
 
-        self.redis_url = os.environ.get("REDIS_URL", meta_url or "s1.meta.vmc.loc:6379:1")
+        self.redis_url = os.environ.get("REDIS_URL", redis_url or "s1.meta.vmc.loc:6379:1")
         self.meta_url = os.environ.get("META_URL", meta_url or "http://apimeta.devision.io")
         self.api_proxy_url = os.environ.get("API_PROXY_URL", api_proxy_url or "http://apiproxy.apis.kb.1ad.ru")
 

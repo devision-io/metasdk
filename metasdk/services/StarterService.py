@@ -2,6 +2,7 @@ import json
 from time import sleep
 
 import requests
+import time
 
 
 class StarterService:
@@ -43,10 +44,9 @@ class StarterService:
         :param service_id: ID сервиса
         :param callback_fn: Функция обратного вызова, в нее будет передаваться task_info и is_finish как признак, что обработка завершена
         :param sleep_sec: задержка между проверкой по БД. Не рекомендуется делать меньше 10, так как это может очень сильно ударить по производительности БД
-        :return: void
+        :return: None|dict
         """
         while True:
-            import time
             time.sleep(sleep_sec)
             task_info = self.__metadb.one("""
                 SELECT id, service_id, status, result_data 
@@ -62,7 +62,7 @@ class StarterService:
                 "task_info": task_info
             })
             if task_info is None:
-                break
+                return None
 
             is_finish = task_info['status'] != 'NEW' and task_info['status'] != 'PROCESSING'
 
@@ -71,7 +71,7 @@ class StarterService:
                 callback_fn(task_info, is_finish)
 
             if is_finish:
-                break
+                return task_info
 
     def submit(self, service_id: str, data: dict = None):
         """

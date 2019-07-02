@@ -12,6 +12,7 @@ from metasdk.logger.bulk_logger import BulkLogger
 from metasdk.logger.logger import Logger
 from metasdk.services import get_api_call_headers, process_meta_api_error_code
 from metasdk.services.ApiProxyService import ApiProxyService
+from metasdk.services.CacheService import CacheService
 from metasdk.services.DbQueryService import DbQueryService
 from metasdk.services.DbService import DbService
 from metasdk.services.ExportService import ExportService
@@ -51,6 +52,7 @@ class MetaApp(object):
     MediaService = None
     MetaqlService = None
     ExportService = None
+    CacheService = None
     SettingsService = None
     IssueService = None
     UserManagementService = None
@@ -102,6 +104,7 @@ class MetaApp(object):
         self.MetaqlService = MetaqlService(self, self.__default_headers)
         self.SettingsService = SettingsService(self, self.__default_headers)
         self.ExportService = ExportService(self, self.__default_headers)
+        self.CacheService = CacheService(self, self.__default_headers)
         self.IssueService = IssueService(self, self.__default_headers)
         self.StarterService = StarterService(self, self.__default_headers)
         self.MailService = MailService(self, self.__default_headers)

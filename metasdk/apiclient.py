@@ -9,7 +9,7 @@ from metasdk.exceptions import SDKError
 from metasdk.internal import read_cfg, write_cfg
 
 AUTH_CACHE_FILE = "/.rwmeta_auth_cache.json"
-OAUTH_TOKEN_URL = "https://account.devision.io/oauth2/token"
+OAUTH_TOKEN_URL = "https://account.garpun.com/oauth2/token"
 
 
 class ApiClient:

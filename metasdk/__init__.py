@@ -182,6 +182,7 @@ class MetaApp(object):
             "timeout": (60, 1800)
         }
 
+        last_e = ServerError(request)
         for _try_idx in range(20):
             try:
                 resp = requests.post(**request)
@@ -199,6 +200,12 @@ class MetaApp(object):
             except (requests.exceptions.ConnectionError, ConnectionError, TimeoutError) as e:
                 self.log.warning('META API Connection Error. Sleep...', {"e": e})
                 time.sleep(15)
+
+            except ServerError as e:
+                last_e = e
+                self.log.warning('META Server Error. Sleep...', {"e": e})
+                time.sleep(15)
+
             except Exception as e:
                 if 'Служба частично или полностью недоступна' in str(e):
                     self.log.warning('META API Connection Error. Sleep...', {"e": e})
@@ -206,7 +213,7 @@ class MetaApp(object):
                 else:
                     raise e
 
-        raise ServerError(request)
+        raise last_e
 
     def native_api_call(self, service, method, data, options, multipart_form=False, multipart_form_data=None, stream=False, http_path="/api/meta/v1/", http_method='POST',
                         get_params=None, connect_timeout_sec=60):
@@ -245,6 +252,7 @@ class MetaApp(object):
             request['data'] = json.dumps(data)
         request['headers'] = _headers
 
+        last_e = ServerError(request)
         for _try_idx in range(20):
             try:
                 resp = requests.request(http_method, **request)
@@ -255,6 +263,12 @@ class MetaApp(object):
             except (requests.exceptions.ConnectionError, ConnectionError, TimeoutError) as e:
                 self.log.warning('META API Connection Error. Sleep...', {"e": e})
                 time.sleep(15)
+
+            except ServerError as e:
+                last_e = e
+                self.log.warning('META Server Error. Sleep...', {"e": e})
+                time.sleep(15)
+
             except Exception as e:
                 if 'Служба частично или полностью недоступна' in str(e):
                     self.log.warning('META API Service Temporarily Unavailable. Sleep...', {"e": e})
@@ -262,7 +276,7 @@ class MetaApp(object):
                 else:
                     raise e
 
-        raise ServerError(request)
+        raise last_e
 
     def get_lib_version(self):
         from metasdk import info

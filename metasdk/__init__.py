@@ -81,7 +81,7 @@ class MetaApp(object):
 
         self.redis_url = os.environ.get("REDIS_URL", redis_url or "s1.meta.vmc.loc:6379:1")
         self.meta_url = os.environ.get("META_URL", meta_url or "http://apimeta.devision.io")
-        self.api_proxy_url = os.environ.get("API_PROXY_URL", api_proxy_url or "http://apiproxy.apis.kb.1ad.ru")
+        self.api_proxy_url = os.environ.get("API_PROXY_URL", api_proxy_url or "http://apiproxy.apis.devision.io")
 
         if debug and not starter_api_url:
             starter_api_url = "http://STUB_URL"
@@ -253,9 +253,11 @@ class MetaApp(object):
         request['headers'] = _headers
 
         last_e = ServerError(request)
-        for _try_idx in range(20):
+        for _try_idx in range(10):
             try:
                 resp = requests.request(http_method, **request)
+                # добавляем глобальную трассировку в логи
+                self.log.set_entity("request_id", resp.headers.get('request_id'))
                 if resp.status_code == 200:
                     return resp
                 else:
@@ -275,6 +277,8 @@ class MetaApp(object):
                     time.sleep(15)
                 else:
                     raise e
+            finally:
+                self.log.set_entity("request_id", None)
 
         raise last_e
 

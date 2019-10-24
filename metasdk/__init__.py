@@ -5,6 +5,8 @@ import time
 
 import requests
 
+from metasdk.__state import set_current_app
+from metasdk.event_bus import EventBus
 from metasdk.exceptions import UnexpectedError, DbQueryError, ServerError
 from metasdk.internal import read_developer_settings
 from metasdk.logger import create_logger, eprint
@@ -30,6 +32,7 @@ from metasdk.worker import Worker
 
 
 class MetaApp(object):
+    current_app = None  # type: MetaApp
     debug = False
     service_id = None
     build_num = None
@@ -39,6 +42,7 @@ class MetaApp(object):
     api_proxy_url = None
     log = Logger()
     worker = None
+    event_bus = None
 
     # Будет поставляться в конец UserAgent
     user_agent_postfix = ""
@@ -116,8 +120,12 @@ class MetaApp(object):
         self.LockService = LockService(self)
 
         if include_worker:
+            self.event_bus = EventBus(self)
+
             stdin = "[]" if debug else ''.join(sys.stdin.readlines())
             self.worker = Worker(self, stdin)
+
+        set_current_app(self)
 
     def bulk_log(self, log_message=u"Еще одна пачка обработана", total=None, part_log_time_minutes=5):
         """

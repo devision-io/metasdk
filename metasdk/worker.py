@@ -27,6 +27,10 @@ class Worker:
         self.__run(main_fn, 'ignore')
 
     def __run(self, main_fn, resolver_type):
+        if 'GARPUN_CLOUD_GENERATE' in os.environ:
+            # идет генерация чего-то и реально запускать даже тестовую задачу на надо
+            return
+
         tasks = self.__get_tasks()
         if not tasks:
             return

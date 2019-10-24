@@ -164,7 +164,13 @@ DbQueryService
 
 .. code-block:: python
 
+    # Важно значть, что эти методы:
+    # - НЕ парсят и НЕ меняют запросы к БД (кроме подстановки prepared statements)
+    # - НЕ являются каким-то отдельным обобщенным SQL-диалектом. Т.е. запросы в этом виже будут переданы напрямую в БД
+    # - Обовщяют получение данных и их типлв
+
     db_adplatform = META.db("adplatform")
+
     # Методы query, all, one ОБЯЗАТЕЛЬНО должны возвращать ResultSet (может быть и пустой)
     # Т.е. нельзя делать UPDATE, INSET, DELETE, TRUNCATE, исключение - если в PostgreSQL вы делаете RETURNING
 
@@ -185,6 +191,9 @@ DbQueryService
     """, {"name": "md_source_update"})
     print(u"dr = %s" % pretty_json(dr))
 
+    # Для случаев, когда вам надо сделать массовую вставку группы строк
+    # Эта запись НЕ вызывает цикл вставки по одной записи, это реально групповая удобная вставка
+    # Является хорошей альтернативой к генерации списка VALUES или INSERT FROM SELECT с размапливанием json в таблицу
     dr = db_meta_samples.batch_update("""
         INSERT INTO test_batch_update VALUES (:id, :mytime::timestamp)
         ON CONFLICT(id) DO UPDATE SET mod_time=NOW()

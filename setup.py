@@ -20,6 +20,7 @@ with open(path.join(here, 'README.rst')) as f:
 
 packages = [
     'metasdk',
+    'metasdk.tools',
     'metasdk.logger',
     'metasdk.services'
 ]

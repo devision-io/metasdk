@@ -5,7 +5,7 @@ META = MetaApp()
 log = META.log
 
 
-@META.event_bus.listener(entity_id="2830", code=["ADD", "SET"], form_patterns=["*"])
+@META.event_bus.listener(entity_id="2830", code=["ADD", "SET"], form_pattern=["*"], dispatcher_pattern=["meta.garpun_feeds"])
 def on_upsert_ex_access(event: Event):
     print(u"on_upsert_ex_access = %s" % str(event))
     print(u"event.value = %s" % str(event.value))
@@ -15,9 +15,10 @@ def on_upsert_ex_access(event: Event):
 META.worker.debug_tasks = [{
     "data": {
         "event": {
-            "user_id": 10191,
-            "entity_id": 2830,
-            "object_id": "42",
+            "dispatcher": "meta.garpun_feeds",
+            "userId": 10191,
+            "entityId": 2830,
+            "objectId": "7fb540bf-3cb3-4fa8-b11e-9a5a593d500b",
             "code": "SET",
             # "form": None,
             "form": "test",

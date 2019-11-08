@@ -4,12 +4,11 @@ import shutil
 
 
 class DbQueryService:
-    def __init__(self, app, default_headers, options):
+    def __init__(self, app, options):
         """
         :type app: metasdk.MetaApp
         """
         self.__app = app
-        self.__default_headers = default_headers
         self.__options = options
 
     def schema_data(self, configuration):

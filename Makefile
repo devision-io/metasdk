@@ -12,4 +12,4 @@ publish:
 	$(shell git tag $(VERSION))
 	$(shell git push origin $(VERSION))
 
-	rm -fr build dist .egg requests.egg-info
+	rm -fr build dist .egg metasdk.egg-info

@@ -23,6 +23,7 @@ from metasdk.services.FeedService import FeedService
 from metasdk.services.IssueService import IssueService
 from metasdk.services.MediaService import MediaService
 from metasdk.services.MetaqlService import MetaqlService
+from metasdk.services.ObjectLogService import ObjectLogService
 from metasdk.services.SettingsService import SettingsService
 from metasdk.services.UserManagementService import UserManagementService
 from metasdk.services.StarterService import StarterService
@@ -95,29 +96,33 @@ class MetaApp(object):
             self.log.warning("Параметр service_id скоро будет удален из MetaApp")
 
         gcloud_log_host_port = os.environ.get("GCLOUD_LOG_HOST_PORT", "n3.adp.vmc.loc:31891")
-        service_ns = os.environ.get('SERVICE_NAMESPACE', "appscript")  # для ns в логах
+        service_ns = os.environ.get('SERVICE_NAMESPACE', "appscript")  # для ns в логах и для префикса Dispatcher
         service_id = os.environ.get('SERVICE_ID', "local_debug_serivce")
         self.build_num = os.environ.get('BUILD_NUM', '0')
+        self.service_ns = service_ns
         self.service_id = service_id
+        self.dispatcher_name = self.service_ns + "." + self.service_id
+
         create_logger(service_id=service_id, service_ns=service_ns, build_num=self.build_num, gcloud_log_host_port=gcloud_log_host_port, debug=self.debug)
 
         self.__read_developer_settings()
 
         self.__default_headers = get_api_call_headers(self)
-        self.MediaService = MediaService(self, self.__default_headers)
-        self.MetaqlService = MetaqlService(self, self.__default_headers)
-        self.SettingsService = SettingsService(self, self.__default_headers)
-        self.ExportService = ExportService(self, self.__default_headers)
-        self.CacheService = CacheService(self, self.__default_headers)
-        self.IssueService = IssueService(self, self.__default_headers)
-        self.StarterService = StarterService(self, self.__default_headers)
-        self.MailService = MailService(self, self.__default_headers)
-        self.DbService = DbService(self, self.__default_headers)
-        self.UserManagementService = UserManagementService(self, self.__default_headers)
-        self.ApiProxyService = ApiProxyService(self, self.__default_headers)
-        self.ExternalSystemService = ExternalSystemService(self, self.__default_headers)
-        self.FeedService = FeedService(self, self.__default_headers)
+        self.MediaService = MediaService(self)
+        self.MetaqlService = MetaqlService(self)
+        self.SettingsService = SettingsService(self)
+        self.ExportService = ExportService(self)
+        self.CacheService = CacheService(self)
+        self.IssueService = IssueService(self)
+        self.StarterService = StarterService(self)
+        self.MailService = MailService(self)
+        self.DbService = DbService(self)
+        self.UserManagementService = UserManagementService(self)
+        self.ApiProxyService = ApiProxyService(self)
+        self.ExternalSystemService = ExternalSystemService(self)
+        self.FeedService = FeedService(self)
         self.LockService = LockService(self)
+        self.ObjectLogService = ObjectLogService(self)
 
         if include_worker:
             self.event_bus = EventBus(self)
@@ -149,7 +154,7 @@ class MetaApp(object):
 
         db_key = db_alias + '__' + str(shard_key)
         if db_key not in self.__db_list:
-            self.__db_list[db_key] = DbQueryService(self, self.__default_headers, {"db_alias": db_alias, "dbAlias": db_alias, "shard_find_key": shard_key, "shardKey": shard_key})
+            self.__db_list[db_key] = DbQueryService(self, {"db_alias": db_alias, "dbAlias": db_alias, "shard_find_key": shard_key, "shardKey": shard_key})
         return self.__db_list[db_key]
 
     @property

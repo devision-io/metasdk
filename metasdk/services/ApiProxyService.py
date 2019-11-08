@@ -13,12 +13,11 @@ class ApiProxyService:
 
     MAX_PAGES = 100000
 
-    def __init__(self, app, default_headers):
+    def __init__(self, app):
         """
         :type app: metasdk.MetaApp
         """
         self.__app = app
-        self.__default_headers = default_headers
         self.__options = {}
         self.__data_get_cache = {}
         self.__data_get_flatten_cache = {}

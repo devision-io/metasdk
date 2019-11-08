@@ -2,12 +2,11 @@ import json
 
 
 class ExportService:
-    def __init__(self, app, default_headers):
+    def __init__(self, app):
         """
         :type app: metasdk.MetaApp
         """
         self.__app = app
-        self.__default_headers = default_headers
         self.__options = {}
 
     def export_page(self, app_id, page_id, entity_id, object_id, export_data_ids, params=None, export_format="csv", export_empty=False):

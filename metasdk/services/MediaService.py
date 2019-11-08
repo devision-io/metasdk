@@ -2,12 +2,11 @@ import json
 
 
 class MediaService:
-    def __init__(self, app, default_headers):
+    def __init__(self, app):
         """
         :type app: metasdk.MetaApp
         """
         self.__app = app
-        self.__default_headers = default_headers
         self.__options = {}
 
     def persist_one(self, file_base64_content, filename, extension, mime, is_private=True):

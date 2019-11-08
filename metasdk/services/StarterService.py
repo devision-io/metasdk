@@ -8,7 +8,7 @@ import time
 class StarterService:
     headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
 
-    def __init__(self, app, default_headers):
+    def __init__(self, app):
         """
         Прямые запросы к БД скорее всего уйдут в апи запускатора, так как скорее всего пбудет много БД для тасков запускатора, так как
         Если будет 100500 шард, то врядли все будет в одной БД
@@ -16,7 +16,6 @@ class StarterService:
         :type app: metasdk.MetaApp
         """
         self.__app = app
-        self.__default_headers = default_headers
         self.__options = {}
         self.__data_get_cache = {}
         self.__metadb = app.db("meta")

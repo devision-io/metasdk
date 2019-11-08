@@ -4,12 +4,11 @@ import shutil
 
 
 class MetaqlService:
-    def __init__(self, app, default_headers):
+    def __init__(self, app):
         """
         :type app: metasdk.MetaApp
         """
         self.__app = app
-        self.__default_headers = default_headers
         self.__options = {}
 
     def download_data(self, configuration, output_file):

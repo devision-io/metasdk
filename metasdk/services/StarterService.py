@@ -8,7 +8,7 @@ import time
 class StarterService:
     headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
 
-    def __init__(self, app):
+    def __init__(self, app, db, starter_api_url):
         """
         Прямые запросы к БД скорее всего уйдут в апи запускатора, так как скорее всего пбудет много БД для тасков запускатора, так как
         Если будет 100500 шард, то врядли все будет в одной БД
@@ -18,7 +18,8 @@ class StarterService:
         self.__app = app
         self.__options = {}
         self.__data_get_cache = {}
-        self.__metadb = app.db("meta")
+        self.__metadb = db
+        self.__starter_api_url = starter_api_url
         self.log = app.log
         self.max_retries = 30
 
@@ -80,7 +81,10 @@ class StarterService:
         :param data: Полезная нагрузка задачи
         :return: dict
         """
-        if self.__app.starter_api_url == 'http://STUB_URL':
+        # импорт тут, так как глобально над классом он не работает
+        from metasdk import DEV_STARTER_STUB_URL
+
+        if self.__starter_api_url == DEV_STARTER_STUB_URL:
             self.log.info('STARTER DEV. Задача условно поставлена', {
                 "service_id": service_id,
                 "data": data,
@@ -88,7 +92,7 @@ class StarterService:
             return
 
         task = {"serviceId": service_id, "data": data}
-        url = self.__app.starter_api_url + '/services/' + service_id + '/tasks'
+        url = self.__starter_api_url + '/services/' + service_id + '/tasks'
         last_e = None
         for _idx in range(self.max_retries):
             try:

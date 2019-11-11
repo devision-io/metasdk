@@ -31,6 +31,8 @@ from metasdk.services.MailService import MailService
 from metasdk.services.LockService import LockService
 from metasdk.worker import Worker
 
+DEV_STARTER_STUB_URL = "http://STUB_URL"
+
 
 class MetaApp(object):
     current_app = None  # type: MetaApp
@@ -89,7 +91,7 @@ class MetaApp(object):
         self.api_proxy_url = os.environ.get("API_PROXY_URL", api_proxy_url or "http://apiproxy.apis.devision.io")
 
         if debug and not starter_api_url:
-            starter_api_url = "http://STUB_URL"
+            starter_api_url = DEV_STARTER_STUB_URL
         self.starter_api_url = os.environ.get("STARTER_URL", starter_api_url or "http://s2.meta.vmc.loc:28341")
 
         if service_id:
@@ -114,7 +116,7 @@ class MetaApp(object):
         self.ExportService = ExportService(self)
         self.CacheService = CacheService(self)
         self.IssueService = IssueService(self)
-        self.StarterService = StarterService(self)
+        self.StarterService = StarterService(self, self.db("meta"), self.starter_api_url)
         self.MailService = MailService(self)
         self.DbService = DbService(self)
         self.UserManagementService = UserManagementService(self)

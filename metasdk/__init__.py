@@ -17,6 +17,7 @@ from metasdk.services.ApiProxyService import ApiProxyService
 from metasdk.services.CacheService import CacheService
 from metasdk.services.DbQueryService import DbQueryService
 from metasdk.services.DbService import DbService
+from metasdk.services.DevService import DevService
 from metasdk.services.ExportService import ExportService
 from metasdk.services.ExternalSystemService import ExternalSystemService
 from metasdk.services.FeedService import FeedService
@@ -125,6 +126,7 @@ class MetaApp(object):
         self.FeedService = FeedService(self)
         self.LockService = LockService(self)
         self.ObjectLogService = ObjectLogService(self)
+        self.DevService = DevService(self)
 
         if include_worker:
             self.event_bus = EventBus(self)

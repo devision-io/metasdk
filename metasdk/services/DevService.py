@@ -23,7 +23,7 @@ class DevService:
         Сделано это для безопасности
         """
         data = {
-            "user_id": user_id,
+            "userId": user_id,
             "scopes": scopes
         }
         dr = self.__app.native_api_call('dev', 'issue-access-token', data, self.__options, False, None, False, http_path="/api/meta/v1/", http_method='POST')

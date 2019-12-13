@@ -60,6 +60,9 @@ class ExternalSystemService:
         return self.__prep_ex_access(ex_access)
 
     def __prep_ex_access(self, ex_access):
+        if ex_access is None:
+            return None
+
         token_info_ = ex_access.get('token_info')
 
         if token_info_ and token_info_.get('accessToken'):

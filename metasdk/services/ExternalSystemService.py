@@ -13,6 +13,36 @@ class ExternalSystemService:
         self.__metadb = app.db("meta")
         self.__crypt_params = None
 
+    def discovery_access(self, company_id: int, ex_system_id: str, access_login: str):
+        """
+        Удобно, когда у вас есть понимаение кода надо сделать запрос, но нет ex_access_id.
+        Например интеграторы
+        :param company_id:
+        :param ex_system_id:
+        :param access_login:
+        :return:
+        """
+        ex_access = self.__metadb.one(
+            """
+            SELECT
+                ex_system_id, 
+                login, 
+                token_info,
+                form_data 
+            FROM meta.ex_access 
+            WHERE login = :access_login
+                AND ex_system_id = :ex_system_id
+                AND company_id = :company_id
+            """,
+            {
+                "access_login": access_login,
+                "ex_system_id": ex_system_id,
+                "company_id": company_id
+            }
+        )
+
+        return self.__prep_ex_access(ex_access)
+
     def get_access(self, ex_access_id):
         ex_access = self.__metadb.one(
             """
@@ -27,6 +57,9 @@ class ExternalSystemService:
             {"id": ex_access_id}
         )
 
+        return self.__prep_ex_access(ex_access)
+
+    def __prep_ex_access(self, ex_access):
         token_info_ = ex_access.get('token_info')
 
         if token_info_ and token_info_.get('accessToken'):

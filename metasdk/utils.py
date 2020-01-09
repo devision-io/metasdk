@@ -3,6 +3,7 @@
 Супер мелкие функции, которые нужны от 3 использований
 
 """
+import hashlib
 import json
 from itertools import islice
 import jwt
@@ -60,3 +61,19 @@ def decode_jwt(input_text, secure_key):
     encoded = (input_text.split(":")[1]).encode('utf-8')
     decoded = jwt.decode(encoded, secure_key)
     return decoded['sub']
+
+
+def file_hash_sum(file_full_path: str) -> str:
+    """
+    Хэш от содержимого файла
+    :param file_full_path: полный путь к файлу
+    :return: Хэш строкой
+    """
+    with open(file_full_path, "rb") as f:
+        h = hashlib.sha256()
+        while True:
+            data = f.read(8192)
+            if not data:
+                break
+            h.update(data)
+    return h.hexdigest()

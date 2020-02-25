@@ -14,28 +14,40 @@ class MessageQueueService:
         self.__producers_by_serialize_type = {}
         self.__send_scheduler()
         self.__incr = 0
+        self.__value_serializer = {
+            "json": lambda m: json.dumps(m).encode('ascii'),
+            "bytes": None
+        }
+        self.__value_deserializer = {
+            "json": lambda m: json.loads(m.decode('ascii')),
+            "bytes": None
+        }
 
-    def send_message(self, topic: str, value: dict):
-        producer = self.__get_producer('json')
+    def send_message(self, topic: str, value: dict, serializer="json"):
+        producer = self.__get_producer(serializer)
         producer.send(topic, value)
         self.__incr += 1
 
-    def receive_messages(self, topics: str, group_id: str, consumer_timeout_ms=None):
+    def receive_messages(self, topics: str, group_id: str, consumer_timeout_ms: float = None, serializer="json"):
         if consumer_timeout_ms is None:
             consumer_timeout_ms = float('inf')
-        return self.__get_consumer(topics, group_id, consumer_timeout_ms, "json")
+        consumer = self.__get_consumer(topics, group_id, consumer_timeout_ms, serializer)
+        for msg in consumer:
+            yield msg
+        # return consumer
 
     def __get_consumer(self, topics: str, group_id: str, consumer_timeout_ms: float, deserialize_type) -> KafkaConsumer:
+        # TODO: enable_auto_commit
         return KafkaConsumer(topics,
                              group_id=group_id,
                              consumer_timeout_ms=consumer_timeout_ms,
-                             value_deserializer=self.__get_value_deserializer(deserialize_type),
+                             value_deserializer=self.__value_deserializer[deserialize_type],
                              bootstrap_servers=self.__app.kafka_url)
 
     def __get_producer(self, serialize_type) -> KafkaProducer:
         if serialize_type not in self.__producers_by_serialize_type:
             p = KafkaProducer(bootstrap_servers=self.__app.kafka_url,
-                              value_serializer=self.__get_value_serializer(serialize_type),
+                              value_serializer=self.__value_serializer[serialize_type],
                               retries=5,
                               compression_type='gzip')
 
@@ -50,25 +62,12 @@ class MessageQueueService:
 
         return self.__producers_by_serialize_type[serialize_type]
 
-    def __get_value_serializer(self, serialize_type):
-        value_serializer = {
-            "json": lambda m: json.dumps(m).encode('ascii')
-        }[serialize_type]
-        return value_serializer
-
-    def __get_value_deserializer(self, serialize_type):
-        value_serializer = {
-            "json": lambda m: json.loads(m.decode('ascii'))
-        }[serialize_type]
-        return value_serializer
-
     def flush_all(self):
+        """
+        Вызывает блокирующую отправку сообщений в брокер
+        """
         if not self.__producers_by_serialize_type:
             return
-
-        print(u"flush_all")
-        print(u"self.__incr = %s" % str(self.__incr))
-        print(u"self.__producers_by_serialize_type = %s" % str(self.__producers_by_serialize_type))
 
         p: KafkaProducer
         for p in self.__producers_by_serialize_type.values():
@@ -80,10 +79,8 @@ class MessageQueueService:
             while True:
                 try:
                     self.flush_all()
-                except:
-                    # TODO:
-                    self.__app.log.error("Unable to flush message queue")
-                    pass
+                except Exception as e:
+                    self.__app.log.error("Unable to flush message queue", {"e": e})
                 time.sleep(5)
 
         w = Thread(target=send_timer)

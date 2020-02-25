@@ -34,7 +34,6 @@ class MessageQueueService:
         consumer = self.__get_consumer(topics, group_id, consumer_timeout_ms, serializer)
         for msg in consumer:
             yield msg
-        # return consumer
 
     def __get_consumer(self, topics: str, group_id: str, consumer_timeout_ms: float, deserialize_type) -> KafkaConsumer:
         # TODO: enable_auto_commit

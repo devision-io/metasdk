@@ -25,6 +25,7 @@ from metasdk.services.IssueService import IssueService
 from metasdk.services.MediaService import MediaService
 from metasdk.services.MetaqlService import MetaqlService
 from metasdk.services.ObjectLogService import ObjectLogService
+from metasdk.services.MessageQueueService import MessageQueueService
 from metasdk.services.SettingsService import SettingsService
 from metasdk.services.UserManagementService import UserManagementService
 from metasdk.services.StarterService import StarterService
@@ -76,7 +77,8 @@ class MetaApp(object):
                  meta_url: str = None,
                  api_proxy_url: str = None,
                  include_worker: bool = None,
-                 redis_url: str = None
+                 redis_url: str = None,
+                 kafka_url: str = None,
                  ):
         if debug is None:
             is_prod = os.environ.get('PRODUCTION', False)
@@ -87,6 +89,7 @@ class MetaApp(object):
                 debug = False
         self.debug = debug
 
+        self.kafka_url = os.environ.get("KAFKA_URL", kafka_url or "s2.meta.vmc.loc:9094")
         self.redis_url = os.environ.get("REDIS_URL", redis_url or "s1.meta.vmc.loc:6379:1")
         self.meta_url = os.environ.get("META_URL", meta_url or "http://apimeta.devision.io")
         self.api_proxy_url = os.environ.get("API_PROXY_URL", api_proxy_url or "http://apiproxy.apis.devision.io")
@@ -127,6 +130,7 @@ class MetaApp(object):
         self.LockService = LockService(self)
         self.ObjectLogService = ObjectLogService(self)
         self.DevService = DevService(self)
+        self.MessageQueueService = MessageQueueService(self)
 
         if include_worker:
             self.event_bus = EventBus(self)

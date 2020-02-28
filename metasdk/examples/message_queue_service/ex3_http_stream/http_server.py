@@ -1,10 +1,12 @@
 import base64
-import json
+import logging
 import os
 from aiohttp import web
 from aiohttp.web_request import Request
 
 from metasdk import MetaApp
+
+logging.basicConfig(level=logging.ERROR)
 
 META = MetaApp(include_worker=False)
 log = META.log
@@ -51,4 +53,4 @@ else:
     port = 9977
 
 if __name__ == "__main__":
-    web.run_app(app, host=host, port=port)
+    web.run_app(app, host=host, port=port, access_log=None)

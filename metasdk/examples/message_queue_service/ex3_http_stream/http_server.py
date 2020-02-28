@@ -1,12 +1,9 @@
 import base64
-import logging
 import os
 from aiohttp import web
 from aiohttp.web_request import Request
 
 from metasdk import MetaApp
-
-logging.basicConfig(level=logging.ERROR)
 
 META = MetaApp(include_worker=False)
 log = META.log

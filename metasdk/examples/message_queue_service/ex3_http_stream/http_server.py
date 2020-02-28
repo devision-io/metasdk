@@ -24,7 +24,7 @@ async def write_to_kafka(request: Request):
 
     q_data_ = collector_name + '|' + str(request.query_string)
     if request.body_exists:
-        post_data = str(request.text())
+        post_data = str(await request.text())
         if post_data:
             if q_data_:
                 q_data_ += "&"

@@ -12,7 +12,7 @@ messages = q.receive_messages("collect", "g1", serializer="bytes", consumer_time
 
 incr = 0
 for m in messages:
-    # print("m = %s" % str(m))
+    print("m = %s" % str(m))
     # print("m.value = %s" % str(m.value))
     # print("m.value = %s" % str(type(m.value)))
     incr += 1

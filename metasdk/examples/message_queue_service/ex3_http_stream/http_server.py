@@ -5,13 +5,16 @@ from aiohttp.web_request import Request
 
 from metasdk import MetaApp
 
+KAFKA_TOPIC = "collect"
+
 META = MetaApp(include_worker=False)
 log = META.log
 
 is_prod = os.environ.get("PRODUCTION", False)
 
 """
-curl -X POST -d 'pb=1&asdasd' 'http://0.0.0.0:9977/collect?gp=1'
+curl -X POST -d 'pb=1&asdasd' 'http://0.0.0.0:9977/collect/1123?gp=1'
+ab -n 10000 -c 100 -k "http://0.0.0.0:9977/collect/zxc?qwe=123"
 """
 q = META.MessageQueueService
 
@@ -29,7 +32,7 @@ async def write_to_kafka(request: Request):
             if q_data_:
                 q_data_ += "&"
             q_data_ += post_data
-    q.send_message("collect", q_data_.encode(), serializer="bytes")
+    q.send_message(KAFKA_TOPIC, q_data_.encode(), serializer="bytes")
 
 
 async def collect(request: Request):

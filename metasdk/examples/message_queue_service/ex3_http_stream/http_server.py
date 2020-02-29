@@ -16,7 +16,7 @@ is_prod = os.environ.get("PRODUCTION", False)
 curl -X POST -d 'pb=1&asdasd' 'http://0.0.0.0:9977/collect/1123?gp=1'
 ab -n 10000 -c 100 -k "http://0.0.0.0:9977/collect/zxc?qwe=123"
 """
-q = META.MessageQueueService
+producer = META.MessageQueueService.get_producer(serializer="bytes")
 
 PIXEL_GIF_DATA = base64.b64decode(
     b"R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7")
@@ -32,7 +32,7 @@ async def write_to_kafka(request: Request):
             if q_data_:
                 q_data_ += "&"
             q_data_ += post_data
-    q.send_message(KAFKA_TOPIC, q_data_.encode(), serializer="bytes")
+    producer.send(KAFKA_TOPIC, q_data_.encode())
 
 
 async def collect(request: Request):

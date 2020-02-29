@@ -5,7 +5,8 @@ META = MetaApp()
 q = META.MessageQueueService
 
 incr = 0
-for m in q.receive_messages("foo5", None):
+consumer = q.get_consumer("foo5", None)
+for m in consumer.get_messages_stream():
     incr += 1
     print(u"22222 m = %s" % str(m))
 print(u"22222  = %s" % str(incr))

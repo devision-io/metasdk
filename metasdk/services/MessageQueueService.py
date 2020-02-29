@@ -15,8 +15,8 @@ class MQSProducer:
     def __init__(self, producer: KafkaProducer) -> None:
         self.__producer = producer
 
-    def send(self, topic, value):
-        self.__producer.send(topic, value)
+    def send(self, topic, value, key=None):
+        self.__producer.send(topic, value, key=key)
 
 
 class MQSConsumer:
@@ -95,6 +95,9 @@ class MessageQueueService:
 
     def __get_consumer(self, topics: str, group_id: str, consumer_timeout_ms: float,
                        enable_auto_commit: bool, deserialize_type) -> KafkaConsumer:
+        """
+        https://kafka-python.readthedocs.io/en/master/apidoc/KafkaConsumer.html
+        """
         return KafkaConsumer(topics,
                              group_id=group_id,
                              consumer_timeout_ms=consumer_timeout_ms,

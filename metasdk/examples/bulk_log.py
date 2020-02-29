@@ -4,12 +4,6 @@ from metasdk import MetaApp
 
 META = MetaApp()
 
-META.log.info("a")
-for idx in range(100000):
-    META.EventCollectorService.track('account', 'create', 'success', idx)
-META.log.info("b")
-
-exit(0)
 # Самый простой вариант без знания об общем количестве элементов
 bulk_log = META.bulk_log(u'Моя пачка')
 for idx in range(100):
@@ -18,7 +12,6 @@ for idx in range(100):
         print(u"bulk_log.get_percent_done() = %s" % str(bulk_log.get_percent_done()))
     time.sleep(1)
 bulk_log.finish()
-
 
 # Стандартный вариант
 total = 125

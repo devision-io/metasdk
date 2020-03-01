@@ -8,7 +8,8 @@ q = META.MessageQueueService
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 __DIR__ = os.getcwd()
 
-consumer = q.get_consumer("collect", "g1", consumer_timeout_ms=1000000, serializer="bytes")
+consumer = q.get_consumer("collect", "g1", consumer_timeout_ms=1000000,
+                          serializer="bytes")
 
 incr = 0
 for m in consumer.get_messages_stream():

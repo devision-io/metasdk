@@ -26,7 +26,6 @@ from metasdk.services.MediaService import MediaService
 from metasdk.services.MetaqlService import MetaqlService
 from metasdk.services.ObjectLogService import ObjectLogService
 from metasdk.services.MessageQueueService import MessageQueueService
-from metasdk.services.EventCollectorService import EventCollectorService
 from metasdk.services.SettingsService import SettingsService
 from metasdk.services.UserManagementService import UserManagementService
 from metasdk.services.StarterService import StarterService
@@ -132,7 +131,6 @@ class MetaApp(object):
         self.ObjectLogService = ObjectLogService(self)
         self.DevService = DevService(self)
         self.MessageQueueService = MessageQueueService(self)
-        self.EventCollectorService = EventCollectorService(self)
 
         if include_worker:
             self.event_bus = EventBus(self)

@@ -21,11 +21,35 @@ class MQSProducer:
 
 class MQSConsumer:
     def __init__(self, consumer: KafkaConsumer) -> None:
+        self._consumer = consumer
+
+
+class MQSAutoCommitConsumer(MQSConsumer):
+    def get_messages_stream(self):
+        for msg in self._consumer:
+            yield MQSMessage(msg)
+
+
+class MQSFrameCommitConsumer(MQSConsumer):
+
+    def get_frames_stream(self, max_frames: int = 1000, max_messages_in_frame: int = 10000):
+        for frm_idx in range(max_frames):
+            yield MQSConsumerFrameIterator(self._consumer, max_messages_in_frame)
+
+
+class MQSConsumerFrameIterator:
+    def __init__(self, consumer: KafkaConsumer, max_messages_in_frame: int) -> None:
         self.__consumer = consumer
+        self.__max_messages_in_frame = max_messages_in_frame
 
     def get_messages_stream(self):
+        msg_idx = 0
         for msg in self.__consumer:
             yield MQSMessage(msg)
+            msg_idx += 1
+            if msg_idx >= self.__max_messages_in_frame:
+                break
+        self.__consumer.commit()
 
 
 class MQSMessage:
@@ -86,18 +110,32 @@ class MessageQueueService:
         producer = self.__get_producer(serializer)
         return MQSProducer(producer)
 
-    def get_consumer(self, topics: str, group_id: str, consumer_timeout_ms: float = None,
-                     enable_auto_commit: bool = True, serializer="json") -> MQSConsumer:
-        if consumer_timeout_ms is None:
-            consumer_timeout_ms = float('inf')
-        consumer = self.__get_consumer(topics, group_id, consumer_timeout_ms, enable_auto_commit, serializer)
-        return MQSConsumer(consumer)
+    def get_autocommit_consumer(self, topics: str, group_id: str, consumer_timeout_ms: float = None,
+                                serializer="json") -> MQSAutoCommitConsumer:
+        """
+        Используется когда вам надо обрабатывать каждое собщение отдельно и фиксировать его обработку
+        в фоне автоматически
+        """
+        consumer = self.__get_consumer(topics, group_id, consumer_timeout_ms, True, serializer)
+        return MQSAutoCommitConsumer(consumer)
+
+    def get_frame_commit_consumer(self, topics: str, group_id: str, consumer_timeout_ms: float = None,
+                                  serializer="json") -> MQSFrameCommitConsumer:
+        """
+        Используется для групповой обработки и фиксации сообщений
+        например вам надо считать 10к записей пикселя,
+        отправить в ClickHouse и только после успеха зафиксировать обработку сообщений
+        """
+        consumer = self.__get_consumer(topics, group_id, consumer_timeout_ms, False, serializer)
+        return MQSFrameCommitConsumer(consumer)
 
     def __get_consumer(self, topics: str, group_id: str, consumer_timeout_ms: float,
                        enable_auto_commit: bool, deserialize_type) -> KafkaConsumer:
         """
         https://kafka-python.readthedocs.io/en/master/apidoc/KafkaConsumer.html
         """
+        if consumer_timeout_ms is None:
+            consumer_timeout_ms = float('inf')
         return KafkaConsumer(topics,
                              group_id=group_id,
                              consumer_timeout_ms=consumer_timeout_ms,

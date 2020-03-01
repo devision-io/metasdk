@@ -1,8 +1,9 @@
 import json
 from threading import Thread
 import atexit
-from kafka import KafkaProducer, KafkaConsumer
+from kafka import KafkaProducer, KafkaConsumer, TopicPartition
 from kafka.consumer.fetcher import ConsumerRecord
+from kafka.coordinator.assignors.roundrobin import RoundRobinPartitionAssignor
 
 """
 Классы MQS* для инкапсулирования реализации.
@@ -32,24 +33,30 @@ class MQSAutoCommitConsumer(MQSConsumer):
 
 class MQSFrameCommitConsumer(MQSConsumer):
 
-    def get_frames_stream(self, max_frames: int = 1000, max_messages_in_frame: int = 10000):
+    def get_frames_stream(self, max_frames: int = 100000, max_messages_in_frame: int = 10000):
         for frm_idx in range(max_frames):
-            yield MQSConsumerFrameIterator(self._consumer, max_messages_in_frame)
+            frame = MQSConsumerFrame(self._consumer, max_messages_in_frame)
+            yield frame
+            if not frame.get_msg_processed():
+                break
 
 
-class MQSConsumerFrameIterator:
+class MQSConsumerFrame:
     def __init__(self, consumer: KafkaConsumer, max_messages_in_frame: int) -> None:
         self.__consumer = consumer
         self.__max_messages_in_frame = max_messages_in_frame
+        self.__msg_processed = 0
 
     def get_messages_stream(self):
-        msg_idx = 0
         for msg in self.__consumer:
             yield MQSMessage(msg)
-            msg_idx += 1
-            if msg_idx >= self.__max_messages_in_frame:
+            self.__msg_processed += 1
+            if self.__msg_processed >= self.__max_messages_in_frame:
                 break
         self.__consumer.commit()
+
+    def get_msg_processed(self):
+        return self.__msg_processed
 
 
 class MQSMessage:
@@ -126,7 +133,11 @@ class MessageQueueService:
         например вам надо считать 10к записей пикселя,
         отправить в ClickHouse и только после успеха зафиксировать обработку сообщений
         """
+        if consumer_timeout_ms is None:
+            consumer_timeout_ms = 10000
         consumer = self.__get_consumer(topics, group_id, consumer_timeout_ms, False, serializer)
+        p = consumer.partitions_for_topic(topics)
+        print(u"p = %s" % str(p))
         return MQSFrameCommitConsumer(consumer)
 
     def __get_consumer(self, topics: str, group_id: str, consumer_timeout_ms: float,
@@ -138,6 +149,9 @@ class MessageQueueService:
             consumer_timeout_ms = float('inf')
         return KafkaConsumer(topics,
                              group_id=group_id,
+                             auto_offset_reset="earliest",
+                             fetch_max_wait_ms=5000,
+                             partition_assignment_strategy=[RoundRobinPartitionAssignor],
                              consumer_timeout_ms=consumer_timeout_ms,
                              enable_auto_commit=enable_auto_commit,
                              value_deserializer=self.__value_deserializer[deserialize_type],

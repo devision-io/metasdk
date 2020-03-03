@@ -53,7 +53,7 @@ class MQSConsumerFrame:
             self.__msg_processed += 1
             if self.__msg_processed >= self.__max_messages_in_frame:
                 break
-        self.__consumer.commit()
+        # self.__consumer.commit()
 
     def get_msg_processed(self):
         return self.__msg_processed
@@ -117,8 +117,8 @@ class MessageQueueService:
         producer = self.__get_producer(serializer)
         return MQSProducer(producer)
 
-    def get_autocommit_consumer(self, topics: str, group_id: str, consumer_timeout_ms: float = None,
-                                serializer="json") -> MQSAutoCommitConsumer:
+    def get_consumer(self, topics: str, group_id: str, consumer_timeout_ms: float = None,
+                     serializer="json") -> MQSAutoCommitConsumer:
         """
         Используется когда вам надо обрабатывать каждое собщение отдельно и фиксировать его обработку
         в фоне автоматически
@@ -135,7 +135,7 @@ class MessageQueueService:
         """
         if consumer_timeout_ms is None:
             consumer_timeout_ms = 10000
-        consumer = self.__get_consumer(topics, group_id, consumer_timeout_ms, False, serializer)
+        consumer = self.__get_consumer(topics, group_id, consumer_timeout_ms, True, serializer)
         p = consumer.partitions_for_topic(topics)
         print(u"p = %s" % str(p))
         return MQSFrameCommitConsumer(consumer)

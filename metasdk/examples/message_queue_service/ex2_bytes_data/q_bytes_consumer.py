@@ -8,7 +8,7 @@ q = META.MessageQueueService
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 __DIR__ = os.getcwd()
 
-consumer = q.get_autocommit_consumer("imgs", "g1", serializer="bytes")
+consumer = q.get_consumer("imgs", "g1", serializer="bytes")
 for m in consumer.get_messages_stream():
     print("m = %s" % str(m))
     print("m.value = %s" % str(m.value))

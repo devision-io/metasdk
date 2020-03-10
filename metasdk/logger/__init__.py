@@ -97,15 +97,19 @@ class GCloudFormatter(handler.FluentRecordFormatter, object):
         context = record.context if hasattr(record, 'context') else {}
         context.update(metasdk.logger.LOGGER_ENTITY)
         context.update(prepare_errors(record))
+
         message = {
             "message": record.getMessage(),
-            "context": context,
             "severity": record.levelname,
             "serviceContext": {
                 "service": self.service,
                 "version": self.build_num
             }
         }
+        if 'e' in context and isinstance(context['e'], dict) and 'trace' in context['e']:
+            message['stack_trace'] = context['e']['trace']
+            del context['e']['trace']
+        message['context'] = context
         return message
 
     def formatException(self, record):

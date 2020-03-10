@@ -50,7 +50,7 @@ class Worker:
                     log.set_entity("task_id", ignore_.get("id"))
                     main_fn()
         except Exception as e:
-            log.critical(u'Воркер упал из-за неожиданного исключения: ' + str(type(e).__name__), {"e": e})
+            log.critical(u'Воркер упал из-за неожиданного исключения', {"e": e})
             os._exit(1)
 
     def __get_tasks(self):

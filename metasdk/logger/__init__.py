@@ -107,7 +107,7 @@ class GCloudFormatter(handler.FluentRecordFormatter, object):
             }
         }
         if 'e' in context and isinstance(context['e'], dict) and 'trace' in context['e']:
-            message['stack_trace'] = context['e']['trace']
+            message['stack_trace'] = message['message'] + "\n" + context['e']['trace']
             del context['e']['trace']
         message['context'] = context
         return message

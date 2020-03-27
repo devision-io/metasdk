@@ -6,16 +6,18 @@
 Install
 =======
 
+```
 pip3 install metasdk --upgrade --no-cache
+```
 
 Python 3
 
 Получите файл токен разработчика
 Установите developer_settings.json в домашнюю директорию в папку .rwmeta
 Например:
- - MacOS: /Users/arturgspb/.rwmeta/developer_settings.json
- - Windows: C:\\Users\\userXXXXXX\\.rwmeta\\developer_settings.json
- - Linux: ~/.rwmeta/developer_settings.json
+ - MacOS: `/Users/arturgspb/.rwmeta/developer_settings.json`
+ - Windows: `C:\\Users\\userXXXXXX\\.rwmeta\\developer_settings.json`
+ - Linux: `~/.rwmeta/developer_settings.json`
 
 Full Examples
 =============

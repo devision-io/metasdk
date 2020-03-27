@@ -4,8 +4,7 @@
 
 ## Примеры
 
-`Список примеров
-<https://github.com/devision-io/metasdk/tree/master/metasdk/examples/settings_api>`_
+[Список примеров](https://github.com/devision-io/metasdk/tree/master/metasdk/examples/settings_api)
 
 
 ## CacheService

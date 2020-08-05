@@ -17,7 +17,7 @@ class ApiProxyBusinessErrorMixin:
     """
 
 
-class BadRequestError(SDKError, ApiProxyBusinessErrorMixin):
+class BadRequestError(SDKError):
     """
     Запрос принципиально неправильный (неверная версия api, не передан обязательный параметр и пр.) (HTTP 400)
     """
@@ -101,7 +101,7 @@ class LockServiceError(SDKError):
     pass
 
 
-class BadParametersError(SDKError):
+class BadParametersError(SDKError, ApiProxyBusinessErrorMixin):
     """
     Ошибка неправильной настройки параметров для запроса апи или фидов
     """

@@ -58,7 +58,8 @@ class ApiProxyService:
                                      headers=headers)
 
                 self.check_err(resp, analyze_json_error_param=analyze_json_error_param,
-                               retry_request_substr_variants=retry_request_substr_variants)
+                               retry_request_substr_variants=retry_request_substr_variants,
+                               raise_business_errors=raise_business_errors)
                 return resp
             except (RetryHttpRequestError, RateLimitError, ConnectionError) as e:
                 self.__app.log.warning("Sleep retry query: " + str(e), log_ctx)
@@ -68,14 +69,6 @@ class ApiProxyService:
                     sleep_time = e.waiting_time
 
                 time.sleep(sleep_time)
-            except ApiProxyError as e:
-                if raise_business_errors:
-                    str_e = str(e)
-                    for cls in ApiProxyBusinessErrorMixin.__subclasses__():
-                        if cls.__name__ in str_e:
-                            raise cls(str_e)
-                raise e
-
         raise EndOfTriesError("Api of api proxy tries request")
 
     def call_proxy_with_paging(self, engine, payload, method, analyze_json_error_param, retry_request_substr_variants,
@@ -123,7 +116,8 @@ class ApiProxyService:
                                      stream, raise_business_errors=raise_business_errors)
 
     @staticmethod
-    def check_err(resp, analyze_json_error_param=False, retry_request_substr_variants=None):
+    def check_err(resp, analyze_json_error_param=False, retry_request_substr_variants=None,
+                  raise_business_errors=False):
         """
         :type retry_request_substr_variants: list Список вхождений строк, при налиции которых в ошибке апи будет произведен повторный запрос к апи
         """
@@ -144,8 +138,8 @@ class ApiProxyService:
             raise UnexpectedError("HTTP request failed: {} {}".format(resp.status_code, rtext))
         if analyze_json_error_param:
             data_ = resp.json()
-            if 'error' in data_ and data_.get('error'):
-                error = data_.get('error')
+            error = data_.get('error')
+            if error:
                 full_err_ = json.dumps(error)
 
                 if error.get("type") == "RateLimitError":
@@ -154,5 +148,9 @@ class ApiProxyService:
                 for v_ in retry_request_substr_variants:
                     if v_ in full_err_:
                         raise RetryHttpRequestError(full_err_)
+                if raise_business_errors:
+                    for cls in ApiProxyBusinessErrorMixin.__subclasses__():
+                        if cls.__name__ in full_err_:
+                            raise cls(full_err_)
                 raise ApiProxyError(full_err_)
         return resp

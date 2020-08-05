@@ -14,7 +14,7 @@ class MockResponse:
         return self.json_data
 
 
-forbidden_error_response = MockResponse({'error': {'type': 'ForbiddenError', 'text': 'azaza'}}, 200)
+forbidden_error_response = MockResponse({"error": {"type": "ForbiddenError", "text": "azaza"}}, 200)
 
 
 def mock_post(*_, **__):
@@ -22,7 +22,7 @@ def mock_post(*_, **__):
 
 
 class TestApiProxyService(unittest.TestCase):
-    @patch('requests.post', new=mock_post)
+    @patch("requests.post", new=mock_post)
     def test_raise_business_api_proxy_business_errors_on_call_proxy(self):
         self.assertRaises(ForbiddenError,
                           ApiProxyService(MetaApp()).call_proxy,
@@ -34,7 +34,7 @@ class TestApiProxyService(unittest.TestCase):
                           False,
                           True)
 
-    @patch('requests.post', new=mock_post)
+    @patch("requests.post", new=mock_post)
     def test_raise_business_api_proxy_business_errors_on_call_proxy_with_paging(self):
         g = ApiProxyService(MetaApp()).call_proxy_with_paging("engine", {}, "native_call", True, None, 2, True)
         self.assertRaises(ForbiddenError, g.__next__)
@@ -48,5 +48,5 @@ class TestApiProxyService(unittest.TestCase):
                           True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

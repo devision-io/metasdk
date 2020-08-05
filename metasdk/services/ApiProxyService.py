@@ -138,7 +138,7 @@ class ApiProxyService:
             raise UnexpectedError("HTTP request failed: {} {}".format(resp.status_code, rtext))
         if analyze_json_error_param:
             data_ = resp.json()
-            error = data_.get('error')
+            error = data_.get("error")
             if error:
                 full_err_ = json.dumps(error)
 
@@ -150,7 +150,7 @@ class ApiProxyService:
                         raise RetryHttpRequestError(full_err_)
                 if raise_business_errors:
                     for cls in ApiProxyBusinessErrorMixin.__subclasses__():
-                        if cls.__name__ in full_err_:
+                        if cls.__name__ == error.get("type"):
                             raise cls(full_err_)
                 raise ApiProxyError(full_err_)
         return resp

@@ -1,8 +1,10 @@
-import unittest
-from unittest.mock import patch
+import pytest
 
 from metasdk import ApiProxyService, MetaApp
 from metasdk.exceptions import ForbiddenError
+
+
+api_proxy_service = ApiProxyService(MetaApp())
 
 
 class MockResponse:
@@ -21,32 +23,18 @@ def mock_post(*_, **__):
     return forbidden_error_response
 
 
-class TestApiProxyService(unittest.TestCase):
-    @patch("requests.post", new=mock_post)
-    def test_raise_business_api_proxy_business_errors_on_call_proxy(self):
-        self.assertRaises(ForbiddenError,
-                          ApiProxyService(MetaApp()).call_proxy,
-                          "engine",
-                          {},
-                          "native_call",
-                          True,
-                          None,
-                          False,
-                          True)
-
-    @patch("requests.post", new=mock_post)
-    def test_raise_business_api_proxy_business_errors_on_call_proxy_with_paging(self):
-        g = ApiProxyService(MetaApp()).call_proxy_with_paging("engine", {}, "native_call", True, None, 2, True)
-        self.assertRaises(ForbiddenError, g.__next__)
-
-    def test_raise_business_api_proxy_business_errors_on_check_err(self):
-        self.assertRaises(ForbiddenError,
-                          ApiProxyService(MetaApp()).check_err,
-                          forbidden_error_response,
-                          True,
-                          None,
-                          True)
+def test_raise_business_api_proxy_business_errors_on_call_proxy(mocker):
+    mocker.patch('requests.post', new=mock_post)
+    with pytest.raises(ForbiddenError):
+        api_proxy_service.call_proxy("engine", {}, "native_call", True, None, False, True)
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_raise_business_api_proxy_business_errors_on_call_proxy_with_paging(mocker):
+    mocker.patch('requests.post', new=mock_post)
+    with pytest.raises(ForbiddenError):
+        api_proxy_service.call_proxy_with_paging("engine", {}, "native_call", True, None, 2, True).__next__()
+
+
+def test_raise_business_api_proxy_business_errors_on_check_err():
+    with pytest.raises(ForbiddenError):
+        api_proxy_service.check_err(forbidden_error_response, True, None, True)

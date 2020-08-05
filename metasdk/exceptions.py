@@ -8,21 +8,30 @@ class SDKError(Exception):
     pass
 
 
-class BadRequestError(SDKError):
+class ApiProxyBusinessErrorMixin:
+    """
+    Ошибки, приходящие из api-proxy как ApiProxyError, которые нужно привести к изначальному типу
+    для отображения в интерфейсе.
+    Будут отслеживаться все ошибки с этим типом.
+    (см. metasdk.services.ApiProxyService.ApiProxyService.__api_proxy_call)
+    """
+
+
+class BadRequestError(SDKError, ApiProxyBusinessErrorMixin):
     """
     Запрос принципиально неправильный (неверная версия api, не передан обязательный параметр и пр.) (HTTP 400)
     """
     pass
 
 
-class AuthError(SDKError):
+class AuthError(SDKError, ApiProxyBusinessErrorMixin):
     """
     Невозможно авторизоваться (HTTP 401)
     """
     pass
 
 
-class ForbiddenError(SDKError):
+class ForbiddenError(SDKError, ApiProxyBusinessErrorMixin):
     """
     Нет прав для соверщения операции (HTTP 403)
     """
@@ -36,7 +45,7 @@ class ServerError(SDKError):
     pass
 
 
-class NoContentError(SDKError):
+class NoContentError(SDKError, ApiProxyBusinessErrorMixin):
     """
     Нет содержимого (HTTP 204)
     """
@@ -99,7 +108,7 @@ class BadParametersError(SDKError):
     pass
 
 
-class RateLimitError(SDKError):
+class RateLimitError(SDKError, ApiProxyBusinessErrorMixin):
     """
     Достигнут лимит обращений к сервису за секунду.
     Параметр waiting_time - обязательно передавать при вызове ошибки. Пример: raise RateLimitError(waiting_time=5)

@@ -6,7 +6,8 @@ import requests
 from requests.exceptions import ConnectionError
 
 from metasdk.logger import LOGGER_ENTITY
-from metasdk.exceptions import RetryHttpRequestError, EndOfTriesError, UnexpectedError, ApiProxyError, RateLimitError
+from metasdk.exceptions import RetryHttpRequestError, EndOfTriesError, UnexpectedError, ApiProxyError, RateLimitError, \
+    ApiProxyBusinessErrorMixin
 
 
 class ApiProxyService:
@@ -23,7 +24,7 @@ class ApiProxyService:
         self.__data_get_flatten_cache = {}
 
     def __api_proxy_call(self, engine, payload, method, analyze_json_error_param, retry_request_substr_variants,
-                         stream=False):
+                         stream=False, raise_business_errors=False):
         """
         :param engine: Система
         :param payload: Данные для запроса
@@ -67,11 +68,18 @@ class ApiProxyService:
                     sleep_time = e.waiting_time
 
                 time.sleep(sleep_time)
+            except ApiProxyError as e:
+                if raise_business_errors:
+                    str_e = str(e)
+                    for cls in ApiProxyBusinessErrorMixin.__subclasses__():
+                        if cls.__name__ in str_e:
+                            raise cls(str_e)
+                raise e
 
         raise EndOfTriesError("Api of api proxy tries request")
 
     def call_proxy_with_paging(self, engine, payload, method, analyze_json_error_param, retry_request_substr_variants,
-                               max_pages=MAX_PAGES):
+                               max_pages=MAX_PAGES, raise_business_errors=False):
         """
         Постраничный запрос
         :param engine: Система
@@ -81,13 +89,14 @@ class ApiProxyService:
         :param retry_request_substr_variants: Список подстрок, при наличии которых в ответе будет происходить перезапрос
         :param max_pages: Максимальное количество страниц в запросе
         :return: объект генератор
+        :param raise_business_errors: Преобразовывать ApiProxyError в конкретную BusinessError
         """
         copy_payload = copy.deepcopy(payload)
 
         idx = 0
         for idx in range(max_pages):
             resp = self.__api_proxy_call(engine, copy_payload, method, analyze_json_error_param,
-                                         retry_request_substr_variants)
+                                         retry_request_substr_variants, raise_business_errors=raise_business_errors)
             yield resp
 
             paging_resp = resp.json().get("paging")
@@ -99,18 +108,19 @@ class ApiProxyService:
             self.__app.log.warning("Достигнут максимальный предел страниц", {"max_pages": max_pages})
 
     def call_proxy(self, engine, payload, method, analyze_json_error_param, retry_request_substr_variants,
-                   stream=False):
+                   stream=False, raise_business_errors=False):
         """
         :param engine: Система
         :param payload: Данные для запроса
         :param method: string Может содержать native_call | tsv | json_newline
         :param analyze_json_error_param: Нужно ли производить анализ параметра error в ответе прокси
         :param retry_request_substr_variants: Список подстрок, при наличии которых в ответе будет происходить перезапрос
+        :param raise_business_errors: Преобразовывать ApiProxyError в конкретную BusinessError
         :param stream:
         :return:
         """
         return self.__api_proxy_call(engine, payload, method, analyze_json_error_param, retry_request_substr_variants,
-                                     stream)
+                                     stream, raise_business_errors=raise_business_errors)
 
     @staticmethod
     def check_err(resp, analyze_json_error_param=False, retry_request_substr_variants=None):

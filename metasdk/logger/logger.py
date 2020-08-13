@@ -24,12 +24,12 @@ def preprocessing(func):
 
 
 async def error_log_middleware(request, handler):
-    Logger.log_request(**{"method": request.method,
-                          "url": str(request.url),
-                          "uesrAgent": request.headers["User-Agent"],
-                          "referrer": request.headers["Referrer"],  # TODO check how it work
-                          "responseStatusCode": 0,
-                          "remoteIp": request.remote})
+    Logger.log_request(method=request.method,
+                       url=str(request.url),
+                       user_agent=request.headers["User-Agent"],
+                       referrer=request.headers["Referrer"],  # TODO check how it work
+                       response_status_code=0,
+                       remote_ip=request.remote)
     response = await handler(request)
     Logger.set_log_request_response_status_code(response.status)
     return response
@@ -50,11 +50,12 @@ class Logger:
             LOGGER_ENTITY[key] = value
 
     @staticmethod
-    def log_request(method: str, url: str, user_agent: str,
+    def log_request(method: str, url: str, user_agent: str, response_status_code: int = 0,
                     referrer: str = "-", remote_ip:str = "-"):
         REQUEST_LOG.update({"method": method,
                             "url": url,
                             "userAgent": user_agent,
+                            "responseStatusCode": response_status_code,
                             "referrer": referrer,
                             "remoteIp": remote_ip})
 

@@ -3,7 +3,6 @@ import logging
 from _pytest.logging import LogCaptureFixture
 
 from metasdk import MetaApp
-from metasdk.logger import LOGGER_ENTITY
 
 log = MetaApp().log
 

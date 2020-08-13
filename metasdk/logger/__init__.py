@@ -65,7 +65,7 @@ def prepare_errors(record):
 
     try:
         if record.levelno >= 40:
-            if REQUEST_LOG and REQUEST_LOG.get("responseStatusCode") >= 400:
+            if REQUEST_LOG:
                 context["httpRequest"] = REQUEST_LOG
             # Ошибки и выше готовим для Google Cloud ErrorReporting
             # https://cloud.google.com/error-reporting/reference/rest/v1beta1/ErrorContext

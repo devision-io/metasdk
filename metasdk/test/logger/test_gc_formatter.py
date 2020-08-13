@@ -16,24 +16,14 @@ log = Logger()
 def test_request_log_for_error_level_with_error_http_response_code(caplog):
     with caplog.at_level(logging.INFO):
         log.log_request("method", "url", "user_agent")
-        log.set_log_request_response_status_code(400)
         log.error('info_message_0', {"info_context_key_1": "info_context_value_0"})
         formatted_log_message = gc_formatter.format(caplog.records[0])
         assert formatted_log_message["context"]["httpRequest"] == {'method': 'method',
                                                                    'url': 'url',
                                                                    'userAgent': 'user_agent',
                                                                    'referrer': '-',
-                                                                   'responseStatusCode': 400,
+                                                                   'responseStatusCode': 0,
                                                                    'remoteIp': '-'}
-
-
-def test_request_log_for_error_level_with_normal_http_response_code(caplog):
-    with caplog.at_level(logging.INFO):
-        log.log_request("method", "url", "user_agent")
-        log.set_log_request_response_status_code(200)
-        log.error('info_message_0', {"info_context_key_1": "info_context_value_0"})
-        formatted_log_message = gc_formatter.format(caplog.records[0])
-        assert formatted_log_message["context"].get("httpRequest") is None
 
 
 def test_request_log_for_info_level(caplog):

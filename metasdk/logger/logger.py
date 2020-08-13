@@ -32,6 +32,8 @@ async def error_log_middleware(request, handler):
                        remote_ip=request.remote)
     response = await handler(request)
     Logger.set_log_request_response_status_code(response.status)
+    if response.status >= 400:
+        Logger().error("Http request error")
     return response
 
 # Нужно для работы в aiohttp (см. реализацию декоратор middleware в aiohttp)

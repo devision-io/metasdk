@@ -12,6 +12,7 @@ logger.addHandler(h)
 
 log = Logger()
 
+
 def test_request_log_for_error_level_with_error_http_response_code(caplog):
     with caplog.at_level(logging.INFO):
         log.log_request("method", "url", "user_agent")

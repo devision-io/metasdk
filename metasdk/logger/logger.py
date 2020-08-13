@@ -1,5 +1,4 @@
 import logging
-from typing import TypeVar
 
 from metasdk.logger import LOGGER_ENTITY, REQUEST_LOG
 
@@ -28,7 +27,7 @@ async def error_log_middleware(request, handler):
     Logger.log_request(**{"method": request.method,
                           "url": str(request.url),
                           "uesrAgent": request.headers["User-Agent"],
-                          "referrer": request.headers["Referrer"], #TODO check how it work
+                          "referrer": request.headers["Referrer"],  # TODO check how it work
                           "responseStatusCode": 0,
                           "remoteIp": request.remote})
     response = await handler(request)
@@ -50,26 +49,25 @@ class Logger:
         else:
             LOGGER_ENTITY[key] = value
 
-
     @staticmethod
     def log_request(method: str, url: str, user_agent: str,
-                    referrer: str="-", remote_ip:str="-"):
+                    referrer: str = "-", remote_ip:str = "-"):
         REQUEST_LOG.update({"method": method,
                             "url": url,
                             "userAgent": user_agent,
                             "referrer": referrer,
                             "remoteIp": remote_ip})
 
-
     @staticmethod
     def set_log_request_response_status_code(response_status_code: int):
         REQUEST_LOG["responseStatusCode"] = response_status_code
 
-
-    def remove_entity(self, key):
+    @staticmethod
+    def remove_entity(key):
         LOGGER_ENTITY.pop(key, None)
 
-    def info(self, msg, context=None):
+    @staticmethod
+    def info(msg, context=None):
         if context is None:
             context = {}
         logging.info(msg, extra={'context': context})

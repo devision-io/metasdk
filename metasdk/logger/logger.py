@@ -27,8 +27,8 @@ async def error_log_middleware(request, handler):
     try:
         Logger.log_request(method=request.method,
                            url=str(request.url),
-                           user_agent=request.headers["User-Agent"],
-                           referrer=request.headers["Referrer"],  # TODO check how it work
+                           user_agent=request.headers.get("User-Agent", "-"),
+                           referrer=request.headers.get("Referrer", "-"),  # TODO check how it work
                            response_status_code=0,
                            remote_ip=request.remote)
     except Exception as e:

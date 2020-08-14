@@ -13,6 +13,7 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 LOGGER_ENTITY = {}
+REQUEST_LOG = {}
 
 
 def eprint(*args, **kwargs):
@@ -64,6 +65,8 @@ def prepare_errors(record):
 
     try:
         if record.levelno >= 40:
+            if REQUEST_LOG:
+                context["httpRequest"] = REQUEST_LOG
             # Ошибки и выше готовим для Google Cloud ErrorReporting
             # https://cloud.google.com/error-reporting/reference/rest/v1beta1/ErrorContext
             exc_type, exc_value, exc_tb = sys.exc_info()
@@ -110,6 +113,7 @@ class GCloudFormatter(handler.FluentRecordFormatter, object):
             message['stack_trace'] = message['message'] + "\n" + context['e']['trace']
             del context['e']['trace']
         message['context'] = context
+
         return message
 
     def formatException(self, record):

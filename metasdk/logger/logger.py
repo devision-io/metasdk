@@ -32,14 +32,14 @@ async def error_log_middleware(request, handler):
                            response_status_code=0,
                            remote_ip=request.remote)
     except Exception as e:
-        Logger().info("Can't log request", {"request": str(request), "exception": str(e)})
+        Logger().info("Can't log request", {"request": str(request), "exception": e})
     response = await handler(request)
     try:
         Logger.set_log_request_response_status_code(response.status)
         if response.status >= 400:
             Logger().error("Http request error")
     except Exception as e:
-        Logger().info("Can't log request", {"request": str(request), "exception": str(e), "response": str(response)})
+        Logger().info("Can't log request", {"request": str(request), "exception": e, "response": str(response)})
     return response
 
 # Нужно для работы в aiohttp (см. реализацию декоратор middleware в aiohttp)

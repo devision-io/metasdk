@@ -9,4 +9,4 @@ redis==2.10.6
 pytest==6.0.1
 pytest-mock==3.2.0
 urllib3==1.23
-orjson>=3.3.1 # для оч быстрой обработки json
+orjson==3.3.0 # для оч быстрой обработки json

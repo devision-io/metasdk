@@ -1,5 +1,6 @@
 import logging
 
+import pytest
 from _pytest.logging import LogCaptureFixture
 
 from metasdk import MetaApp
@@ -61,3 +62,9 @@ def test_log_entity(caplog):
 
             # clear for next iteration with another log level
             log.remove_entity("entity_key_3")
+
+
+@pytest.mark.parametrize("test_input,expected", [("Воркер упал из-за неожиданного исключения InternalError",
+                                                  "InternalError"), ("UnexpectedError", "UnexpectedError")])
+def test_get_class_from_e_message(test_input, expected):
+    assert test_input.split()[-1] == expected

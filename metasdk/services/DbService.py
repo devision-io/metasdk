@@ -1,5 +1,4 @@
 import json
-import orjson
 from requests import Response
 
 
@@ -22,9 +21,8 @@ class DataResult:
         self.__resp.close()
 
     def __line_unserialize(self, line_str):
-        # стандартный json.loads даже близко не дает схожей производительности
-        # orjson в несколько раз быстрее
-        return orjson.loads(line_str.decode("utf-8"))
+        # IMPORTANT! orjson НЕ юзать, вызывает что-то тпа SegFault на некоторых данных
+        return json.loads(line_str)
 
 
 class DbService:

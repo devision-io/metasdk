@@ -13,6 +13,7 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 LOGGER_ENTITY = {}
+REQUEST_LOG = {}
 
 
 def eprint(*args, **kwargs):
@@ -64,12 +65,15 @@ def prepare_errors(record):
 
     try:
         if record.levelno >= 40:
+            if REQUEST_LOG:
+                context["httpRequest"] = REQUEST_LOG
             # Ошибки и выше готовим для Google Cloud ErrorReporting
             # https://cloud.google.com/error-reporting/reference/rest/v1beta1/ErrorContext
             exc_type, exc_value, exc_tb = sys.exc_info()
             a = traceback.extract_tb(exc_tb)
             first_ex = a[-1]
-            report_location = {'filePath': first_ex.filename, 'functionName': first_ex.name, 'lineNumber': first_ex.lineno}
+            report_location = {'filePath': first_ex.filename, 'functionName': first_ex.name,
+                               'lineNumber': first_ex.lineno}
             context.update({
                 'reportLocation': report_location,
             })
@@ -80,7 +84,6 @@ def prepare_errors(record):
     if ex:
         context.update({
             'e': {
-                'class': str(type(ex).__name__),
                 'message': str(ex),
                 'trace': str(traceback.format_exc()),
             }}
@@ -97,15 +100,22 @@ class GCloudFormatter(handler.FluentRecordFormatter, object):
         context = record.context if hasattr(record, 'context') else {}
         context.update(metasdk.logger.LOGGER_ENTITY)
         context.update(prepare_errors(record))
+
         message = {
             "message": record.getMessage(),
-            "context": context,
             "severity": record.levelname,
             "serviceContext": {
                 "service": self.service,
                 "version": self.build_num
             }
         }
+        if 'e' in context and isinstance(context['e'], dict) and 'trace' in context['e']:
+            message['stack_trace'] = message['message'] + "\n" + context['e']['trace']
+            # получение имени класса ошибки, автоматически добавляется entity
+            message['error_class'] = message['message'].split()[-1]
+            del context['e']['trace']
+        message['context'] = context
+
         return message
 
     def formatException(self, record):

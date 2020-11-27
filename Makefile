@@ -1,13 +1,13 @@
 VERSION=$(shell python metasdk/info.py)
 
 init:
-	python3 -m pip install -r requirements.txt
+	python3.6 -m pip install -r requirements.txt
 
 publish:
 	echo $(VERSION)
 
-	python3 setup.py sdist bdist_wheel
-	python3 -m twine upload dist/*
+	python3.6 setup.py sdist bdist_wheel
+	python3.6 -m twine upload dist/*
 
 	$(shell git tag $(VERSION))
 	$(shell git push origin $(VERSION))

@@ -9,3 +9,4 @@ redis==2.10.6
 pytest==6.1.1
 pytest-mock==3.2.0
 urllib3==1.23
+kafka-python==2.0.2

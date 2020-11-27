@@ -7,8 +7,11 @@ producer = META.MessageQueueService.get_producer()
 
 stop = 1_000_000_000
 stop = 1_000_000
+stop = 100_000
 for i in range(stop):
     producer.send(topic, {"a": i})
     # time.sleep(0.5)
 
 print("end")
+
+# pixel_notify_service_has_content

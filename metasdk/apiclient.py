@@ -48,7 +48,10 @@ class ApiClient:
 
         for _try_idx in range(2):
             url = self.host + '/' + self.api_version + '/' + method_path
-            headers = {"Authorization": "Bearer " + self.access_token}
+            headers = {
+                "Authorization": "Bearer " + self.access_token,
+                "User-Agent": "python metasdk"
+            }
 
             req_param = {
                 "method": http_method,

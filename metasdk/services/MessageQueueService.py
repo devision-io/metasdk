@@ -129,8 +129,8 @@ class MessageQueueService:
     def get_frame_commit_consumer(self, topics: str, group_id: str, consumer_timeout_ms: float = None,
                                   serializer="json") -> MQSFrameCommitConsumer:
         """
-        Используется для групповой обработки и фиксации сообщений
-        например вам надо считать 10к записей пикселя,
+        Используется для групповой обработки и фиксации сообщений.
+        Например вам надо считать 10к записей пикселя,
         отправить в ClickHouse и только после успеха зафиксировать обработку сообщений
         """
         if consumer_timeout_ms is None:

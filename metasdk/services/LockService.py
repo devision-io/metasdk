@@ -24,6 +24,17 @@ class LockService:
 
     @contextmanager
     def lock(self, key: str, ttl_in_sec: int, timeout_in_sec: int, queue_width: int = 1):
+        """
+        @param key: Ключ, который определяет уникальность выполняемого участка кода
+        @param ttl_in_sec: Сколько времени ключ будет жить в Redis'e
+        @param timeout_in_sec: Сколько времени функция lock будет пытаться поставить участок кода на выполнение.
+                Слишком большое значение может привести к зависанию кода.
+        @param queue_width: Максимально возможное количество одновременно запущенных участков кода
+        >>> from metasdk import MetaApp
+        >>> META = MetaApp()
+        >>> with META.LockService.lock(key='do_something', ttl_in_sec=60, timeout_in_sec=5):
+        >>>     # do_something()
+        """
         is_set = None
         self.__connect_to_redis()
         waiting_time = random.randint(1, 3)

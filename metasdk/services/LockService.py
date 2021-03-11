@@ -24,6 +24,16 @@ class LockService:
 
     @contextmanager
     def lock(self, key: str, ttl_in_sec: int, timeout_in_sec: int, queue_width: int = 1):
+        """
+        @param key: Ключ, который определяет уникальность выполняемого участка кода
+        @param ttl_in_sec: Сколько времени ключ будет жить в Redis'e. По истечении времени ключ удалится и начнется выполнение следующего участка кода. Если указать слишком маленькое значение, код не успеет выполниться за это время и начнется выполнение следующего скрипта. 
+        @param timeout_in_sec: Сколько времени функция lock будет пытаться поставить участок кода на выполнение. По истечении времени вызовется исключение. Слишком большое значение может привести к зависанию кода.
+        @param queue_width: Максимально возможное количество одновременно запущенных участков кода
+        >>> from metasdk import MetaApp
+        >>> META = MetaApp()
+        >>> with META.LockService.lock(key="do_something", ttl_in_sec=60, timeout_in_sec=5):
+        >>>     # do_something()
+        """
         is_set = None
         self.__connect_to_redis()
         waiting_time = random.randint(1, 3)
@@ -54,6 +64,20 @@ class LockService:
                 self.__redis_storage.delete(key)
 
     def lock_decorator(self, key: str, ttl_in_sec: int, timeout_in_sec: int, queue_width: int = 1, field_to_uniq=None):
+        """
+        @param key: Ключ, который определяет уникальность выполняемого участка кода
+        @param ttl_in_sec: Сколько времени ключ будет жить в Redis'e. По истечении времени ключ удалится и начнется выполнение следующего участка кода. Если указать слишком маленькое значение, код не успеет выполниться за это время и начнется выполнение следующего скрипта. 
+        @param timeout_in_sec: Сколько времени функция lock будет пытаться поставить участок кода на выполнение. По истечении времени вызовется исключение. Слишком большое значение может привести к зависанию кода.
+        @param queue_width: Максимально возможное количество одновременно запущенных участков кода
+        @param field_to_uniq: добавляет к ключу в редисе значение аргумента переданного в функции.
+                Например вы передали в функцию x=666, к ключу добавится 666.
+
+        >>> from metasdk import MetaApp
+        >>> META = MetaApp()
+        >>> @Meta.LockService.lock_decorator(key="do_something", ttl_in_sec=60, timeout_in_sec=5, field_to_uniq=["x"])
+        >>> def lock_via_decorator(name, x):
+        >>>     # do_something()
+        """
         self.__key = key
 
         def decorator(func):

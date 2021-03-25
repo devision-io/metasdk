@@ -104,6 +104,7 @@ class LockServiceError(SDKError):
 class BadParametersError(SDKError, ApiProxyBusinessErrorMixin):
     """
     Ошибка неправильной настройки параметров для запроса апи или фидов
+    НЕ используем в ApiProxy
     """
     pass
 
@@ -120,6 +121,7 @@ class RateLimitError(SDKError, ApiProxyBusinessErrorMixin):
 
 class QuotaLimitError(SDKError, ApiProxyBusinessErrorMixin):
     """
-    Ошибка неправильной настройки параметров для запроса апи или фидов
+    Эта ошибка означает что достигнуты долговременные ограничения на запрос со стороны системы.
+    Перезапуск кода имеет смысл только через долгое время, например на следующий сутки.
     """
     pass

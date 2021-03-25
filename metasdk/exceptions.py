@@ -118,7 +118,7 @@ class RateLimitError(SDKError, ApiProxyBusinessErrorMixin):
         self.waiting_time = waiting_time
 
 
-class QuotaLimitError(SDKError):
+class QuotaLimitError(SDKError, ApiProxyBusinessErrorMixin):
     """
     Ошибка неправильной настройки параметров для запроса апи или фидов
     """

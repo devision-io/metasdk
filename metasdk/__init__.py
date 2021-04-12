@@ -233,7 +233,7 @@ class MetaApp(object):
         raise last_e
 
     def native_api_call(self, service, method, data, options, multipart_form=False, multipart_form_data=None, stream=False, http_path="/api/meta/v1/", http_method='POST',
-                        get_params=None, connect_timeout_sec=60):
+                        get_params=None, connect_timeout_sec=60, request_timeout_sec=1800):
         """
         :type app: metasdk.MetaApp
         :rtype: requests.Response
@@ -255,7 +255,7 @@ class MetaApp(object):
 
         request = {
             "url": self.meta_url + http_path + service + "/" + method,
-            "timeout": (connect_timeout_sec, 1800),
+            "timeout": (connect_timeout_sec, request_timeout_sec),
             "stream": stream,
             "params": get_params,
         }

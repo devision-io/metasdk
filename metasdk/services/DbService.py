@@ -65,5 +65,6 @@ class DbService:
         """
         params = {}
         params.update(configuration)
-        dr = self.__app.native_api_call('db', 'stream-query', params, self.__options, stream=True)
+        dr = self.__app.native_api_call('db', 'stream-query', params, self.__options, stream=True,
+                                        request_timeout_sec=60 * 60 * 3)
         return DataResult(dr)

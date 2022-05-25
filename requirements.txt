@@ -3,7 +3,7 @@ jsonklog==0.15.0
 six==1.15.0
 python-logstash==0.4.6
 fluent-logger==0.9.6
-PyJWT==1.5.3
+PyJWT==2.4.0
 requests==2.19.1 # 2.20.* имеют баг с докачкой большого потока
 redis==2.10.6
 pytest==6.1.1
